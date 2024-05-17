@@ -1,0 +1,5 @@
+{
+  "HPOA_genes_to_disease": "https://storage.googleapis.com/biobox-public-northamerica/foundry/external/HPOA_genes_to_disease.txt",
+  "HPOA_genes_to_phenotype": "https://storage.googleapis.com/biobox-public-northamerica/foundry/external/HPOA_genes_to_phenotype.txt",
+  "HPOA_phenotype_to_genes": "https://storage.googleapis.com/biobox-public-northamerica/foundry/external/HPOA_phenotype_to_genes.txt"
+}
