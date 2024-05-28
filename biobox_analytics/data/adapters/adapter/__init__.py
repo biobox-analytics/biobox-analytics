@@ -1,6 +1,8 @@
 import json
+from abc import ABC, abstractmethod
 
-class Adapter:
+
+class Adapter(ABC):
     """
     Abstract base class for an Adapter pattern that processes nodes and edges.
 
@@ -33,7 +35,7 @@ class Adapter:
         for x in self.iterate_edges():
             print(self.process_item(x))
 
-    def init():
+    def init(self):
         """Initialize the Adapter. This method can be overridden by subclasses if needed."""
         pass
 
@@ -50,22 +52,22 @@ class Adapter:
         print(json.dumps({"node": node_props, "edge": edge_props}))
 
     @abstractmethod
-    def pull_data():
+    def pull_data(self):
         """Pull data from a data source. Must be implemented by subclasses."""
         pass
 
     @abstractmethod
-    def iterate_nodes():
+    def iterate_nodes(self):
         """Iterate over nodes. Must be implemented by subclasses."""
         pass
 
     @abstractmethod
-    def iterate_edges():
+    def iterate_edges(self):
         """Iterate over edges. Must be implemented by subclasses."""
         pass
 
     @abstractmethod
-    def process_item(item):
+    def process_item(self, item):
         """
         Process a single item (node or edge).
 
@@ -78,7 +80,7 @@ class Adapter:
         pass
 
     @abstractmethod
-    def describe_node_properties():
+    def describe_node_properties(self):
         """
         Describe properties of nodes.
 
@@ -88,7 +90,7 @@ class Adapter:
         pass
 
     @abstractmethod
-    def describe_edge_properties():
+    def describe_edge_properties(self):
         """
         Describe properties of edges.
 
