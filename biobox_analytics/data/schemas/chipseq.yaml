@@ -1,0 +1,50 @@
+id: https://ontology.biobox.io/schemas/chipseq
+name: chipseq
+imports:
+  - ./base
+
+classes:
+  ChipSeq:
+    is_a: Object
+    description: >-
+      A method to determine the genomic regions that proteins bind to.
+
+  Gene:
+    is_a: Object
+
+  Protein:
+    is_a: Object
+
+  ModifiedProtein:
+    is_a: Protein
+    description: >-
+      A protein that has a post-translational modification.
+  
+  Sample:
+    is_a: Object
+
+
+  
+  
+  # Edges
+
+  has translation:
+    is_a: Edge
+    description: >-
+      A gene has a translation to a protein.
+    slot_usage:
+      from:
+        range: Gene
+      to:
+        range: Protein
+
+  assay target on:
+    is_a: Edge
+    description: >-
+      Describes the target for the immuno-precipitation and/or pull down assay.
+    slot_usage:
+      from:
+        range: ChipSeq
+      to:
+        range: Protein
+

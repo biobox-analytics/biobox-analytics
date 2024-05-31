@@ -1,0 +1,58 @@
+id: https://ontology.biobox.io/schemas/base
+name: bxbase
+default_range: string
+default_prefix: bxbase
+prefixes:
+  bxbase: https://ontology.biobox.io/schemas/base
+  linkml: https://w3id.org/linkml/
+imports:
+  - linkml:types
+
+classes:
+  Any:
+    class_uri: linkml:Any
+
+  Object:
+    slots:
+      - uuid
+      - displayName
+      - description
+      - dateCreated
+      - dateUpdated
+
+  Node:
+    attributes:
+      _id:
+        range: string
+        identifier: true
+      labels:
+        range: string
+        array:
+          minimum_number_dimensions: 1
+
+  Edge:
+    attributes:
+      from:
+        range: Node
+      to:
+        range: Node
+      label:
+        range: string
+        required: true
+      properties:
+        range: Any
+
+slots:
+  uuid:
+    identifier: true
+    range: string
+  displayName:
+    required: true
+    range: string
+  description:
+    range: string
+  dateCreated:
+    range: datetime
+  dateUpdated:
+    range: datetime
+
