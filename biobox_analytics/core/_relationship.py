@@ -14,8 +14,10 @@ class Relationship:
         self.metadata = relationshipGroup['relationship']
         self.directionality = 'outbound'
         self.count =relationshipGroup.get('total')
+        self.dbLabelToMatch = relationshipGroup['relationship']['range'][0]['dbLabel']
         if relationshipGroup['outbound'] == False:
             self.directionality = 'inbound'
+            self.dbLabelToMatch = relationshipGroup['relationship']['domain'][0]['dbLabel']
 
     def __call__(self, limit=10, offset=0):
         return self.fetch(limit, offset)
@@ -31,7 +33,7 @@ class Relationship:
                 'Authorization': f'Bearer {_setup.BIOBOX_TOKEN}'
             },
             json={
-                'dbLabel': self.metadata['domain'][0]['dbLabel'],
+                'dbLabel': self.dbLabelToMatch,
                 'directionality':  self.directionality,
                 'limit': limit,
                 'offset': offset,
