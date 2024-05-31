@@ -26,55 +26,13 @@ class Node:
                 'displayName': 'Node'
             }
         if 'relationshipMetadata' in bx_data.keys():
-            print("relationship found")
             self._relationships = bx_data['relationshipMetadata']
             self._generate_relationship_methods()
         self.concept = Concept.get(db_label)
 
 
     def _create_relationship_method(self, name, relationship):
-        print("creating relationship methods")
-        print(relationship['relationship'])
-        if (relationship['outbound'] == False):
-            def relationship_method(limit=10, offset=0):
-                print(f"Calling relationship method: {name} with offset {offset} and limit {limit}")
-                res = requests.post(
-                    f"{_setup.BIOBOX_REST_API}/bioref/object/{quote(self.uuid)}/relationship",
-                    headers={
-                        'x-biobox-orgid': _setup.BIOBOX_ORGID,
-                        'Authorization': f'Bearer {_setup.BIOBOX_TOKEN}'
-                    },
-                    body={
-                        'dbLabel': relationship['relationship']['domain'][0]['dbLabel'],
-                        'directionality': 'inbound',
-                        'limit': limit,
-                        'relationshipLabel': relationship['label']
-                    }
-                )
-                if res.status_code == 200:
-                    return res.json()
-                # Add your relationship logic here
-            return Relationship(name, relationship['relationship'], relationship_method)
-        else:
-            def relationship_method(limit=10, offset=0):
-                print(f"Calling relationship method: {name} with offset {offset} and limit {limit}")
-                res = requests.post(
-                    f"{_setup.BIOBOX_REST_API}/bioref/object/{quote(self.uuid)}/relationship",
-                    headers={
-                        'x-biobox-orgid': _setup.BIOBOX_ORGID,
-                        'Authorization': f'Bearer {_setup.BIOBOX_TOKEN}'
-                    },
-                    body={
-                        'dbLabel': relationship['relationship']['range'][0]['dbLabel'],
-                        'directionality': 'outbound',
-                        'limit': limit,
-                        'relationshipLabel': relationship['label']
-                    }
-                )
-                if res.status_code == 200:
-                    return res.json()
-                # Add your relationship logic here
-            return Relationship(name, relationship['relationship'], relationship_method)
+        return Relationship(name, relationship, self.uuid)
 
     def _generate_relationship_methods(self):
         for relationship in self._relationships:
