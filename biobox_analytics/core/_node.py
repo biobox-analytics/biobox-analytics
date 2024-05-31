@@ -4,8 +4,10 @@ BioBox Node
 import requests
 import biobox_analytics._setup as _setup
 from biobox_analytics.core._concept import Concept
+from biobox_analytics.core._relationship import Relationship
 from urllib.parse import quote
 import json
+    
 class Node:
 
     def __init__(self, uuid, db_label):
@@ -23,7 +25,68 @@ class Node:
                 'uuid': uuid,
                 'displayName': 'Node'
             }
+        if 'relationshipMetadata' in bx_data.keys():
+            print("relationship found")
+            self._relationships = bx_data['relationshipMetadata']
+            self._generate_relationship_methods()
         self.concept = Concept.get(db_label)
+
+
+    def _create_relationship_method(self, name, relationship):
+        print("creating relationship methods")
+        print(relationship['relationship'])
+        if (relationship['outbound'] == False):
+            def relationship_method(limit=10, offset=0):
+                print(f"Calling relationship method: {name} with offset {offset} and limit {limit}")
+                res = requests.post(
+                    f"{_setup.BIOBOX_REST_API}/bioref/object/{quote(self.uuid)}/relationship",
+                    headers={
+                        'x-biobox-orgid': _setup.BIOBOX_ORGID,
+                        'Authorization': f'Bearer {_setup.BIOBOX_TOKEN}'
+                    },
+                    body={
+                        'dbLabel': relationship['relationship']['domain'][0]['dbLabel'],
+                        'directionality': 'inbound',
+                        'limit': limit,
+                        'relationshipLabel': relationship['label']
+                    }
+                )
+                if res.status_code == 200:
+                    return res.json()
+                # Add your relationship logic here
+            return Relationship(name, relationship['relationship'], relationship_method)
+        else:
+            def relationship_method(limit=10, offset=0):
+                print(f"Calling relationship method: {name} with offset {offset} and limit {limit}")
+                res = requests.post(
+                    f"{_setup.BIOBOX_REST_API}/bioref/object/{quote(self.uuid)}/relationship",
+                    headers={
+                        'x-biobox-orgid': _setup.BIOBOX_ORGID,
+                        'Authorization': f'Bearer {_setup.BIOBOX_TOKEN}'
+                    },
+                    body={
+                        'dbLabel': relationship['relationship']['range'][0]['dbLabel'],
+                        'directionality': 'outbound',
+                        'limit': limit,
+                        'relationshipLabel': relationship['label']
+                    }
+                )
+                if res.status_code == 200:
+                    return res.json()
+                # Add your relationship logic here
+            return Relationship(name, relationship['relationship'], relationship_method)
+
+    def _generate_relationship_methods(self):
+        for relationship in self._relationships:
+            rel_name = relationship['relationship']['label'].replace(" ", "_")
+            setattr(self, rel_name, self._create_relationship_method(rel_name, relationship))
+
+    def __getattr__(self, name):
+        attribute = super().__getattribute__(name)
+        if callable(attribute):
+            return attribute
+        else:
+            return attribute.metadata
 
     @property
     def displayName(self):
@@ -46,6 +109,7 @@ class Node:
             self._update()
         else:
             self._create()
+            self._exists = True
 
         print(json.dumps(self._data, indent=2))
 
