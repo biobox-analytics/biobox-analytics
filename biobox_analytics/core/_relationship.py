@@ -9,50 +9,61 @@ import json
 
 class Relationship:
     def __init__(self, name, relationshipGroup, objUUID):
-        self.objectID = objUUID
-        self.name = name
-        self.metadata = relationshipGroup['relationship']
-        self.directionality = 'outbound'
-        self.count =relationshipGroup.get('total')
-        self.dbLabelToMatch = relationshipGroup['relationship']['range'][0]['dbLabel']
+        self._objectID = objUUID
+        self._name = name
+        self._relationship = relationshipGroup['relationship']
+        self._directionality = 'outbound'
+        self._count =relationshipGroup.get('total')
+        self._dbLabelToMatch = relationshipGroup['relationship']['range'][0]['dbLabel']
         if relationshipGroup['outbound'] == False:
-            self.directionality = 'inbound'
-            self.dbLabelToMatch = relationshipGroup['relationship']['domain'][0]['dbLabel']
+            self._directionality = 'inbound'
+            self._dbLabelToMatch = relationshipGroup['relationship']['domain'][0]['dbLabel']
 
     def __call__(self, limit=10, offset=0):
         return self.fetch(limit, offset)
 
     def __repr__(self):
-        return f"{self.name}: {self.metadata}"
+        return f"Relationship '{self._relationship['label']}' on object '{self._objectID}' containing {self._count} connections."
+    
+    @property
+    def metadata(self):
+        return {
+            "objUUID": self._objectID,
+            "name": self._name,
+            "directionality": self._directionality,
+            "count": self._count,
+            "dbLabelToMatch": self._dbLabelToMatch
+        }
+    
     
     def fetch(self, limit=10, offset=0):
         res = requests.post(
-            f"{_setup.BIOBOX_REST_API}/bioref/object/{quote(self.objectID)}/relationship",
+            f"{_setup.BIOBOX_REST_API}/bioref/object/{quote(self._objectID)}/relationship",
             headers={
                 'x-biobox-orgid': _setup.BIOBOX_ORGID,
                 'Authorization': f'Bearer {_setup.BIOBOX_TOKEN}'
             },
             json={
-                'dbLabel': self.dbLabelToMatch,
-                'directionality':  self.directionality,
+                'dbLabel': self._dbLabelToMatch,
+                'directionality':  self._directionality,
                 'limit': limit,
                 'offset': offset,
-                'relationshipLabel': self.metadata['label']
+                'relationshipLabel': self._relationship['label']
             }
         )
         if res.status_code == 200:
             jsonResponse = res.json()
             edge_and_node = []
             for edge in jsonResponse['data']:
-                obj = self.formatEdgeResponse(edge)
+                obj = self._formatEdgeResponse(edge)
                 edge_and_node.append(obj)
             return edge_and_node
                 
-    def formatEdgeResponse(self, response):
+    def _formatEdgeResponse(self, response):
         edgeId = response['elementId']
         edgeLabel = response['relationship']['label']
         edgeProperties = response['properties']
-        if self.directionality == 'outbound':
+        if self._directionality == 'outbound':
             nodeProperties = response['endNode']
         else:
             nodeProperties = response['startNode']

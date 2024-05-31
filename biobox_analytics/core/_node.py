@@ -27,17 +27,17 @@ class Node:
             }
         if 'relationshipMetadata' in bx_data.keys():
             self._relationships = bx_data['relationshipMetadata']
-            self._generate_relationship_methods()
+            self.__generate_relationship_methods()
         self.concept = Concept.get(db_label)
 
 
-    def _create_relationship_method(self, name, relationship):
+    def __create_relationship_method(self, name, relationship):
         return Relationship(name, relationship, self.uuid)
 
-    def _generate_relationship_methods(self):
+    def __generate_relationship_methods(self):
         for relationship in self._relationships:
             rel_name = relationship['relationship']['label'].replace(" ", "_")
-            setattr(self, rel_name, self._create_relationship_method(rel_name, relationship))
+            setattr(self, rel_name, self.__create_relationship_method(rel_name, relationship))
 
     def __getattr__(self, name):
         attribute = super().__getattribute__(name)
