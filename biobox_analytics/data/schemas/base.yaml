@@ -1,9 +1,9 @@
-id: https://ontology.biobox.io/schemas/base
-name: bxbase
+id: https://ontology.biobox.io/linkml/
+name: bx
 default_range: string
-default_prefix: bxbase
+default_prefix: bx
 prefixes:
-  bxbase: https://ontology.biobox.io/schemas/base
+  bx: https://ontology.biobox.io/linkml/
   linkml: https://w3id.org/linkml/
 imports:
   - linkml:types
@@ -29,13 +29,15 @@ classes:
         range: string
         array:
           minimum_number_dimensions: 1
+      properties:
+        range: Any
 
   Edge:
     attributes:
-      from:
-        range: Node
+      _from:
+        range: Object
       to:
-        range: Node
+        range: Object
       label:
         range: string
         required: true
@@ -46,13 +48,43 @@ slots:
   uuid:
     identifier: true
     range: string
+
   displayName:
     required: true
     range: string
+
   description:
     range: string
+
   dateCreated:
     range: datetime
+
   dateUpdated:
     range: datetime
 
+  chr:
+    range: string
+    description: >-
+      Name of the chromosome (or contig, scaffold, etc.)
+
+  start:
+    range: integer
+    description: >-
+      The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 0
+
+  end:
+    range: integer
+    description: >-
+      The ending position of the feature in the chromosome or scaffold.
+      The chromEnd base is not included in the display of the feature.
+      For example, the first 100 bases of a chromosome are defined as chromStart=0, chromEnd=100, 
+      and span the bases numbered 0-99.
+
+  strand:
+    range: string
+    description: >-
+      +/- to denote strand or orientation (whenever applicable). Use "." if no orientation is assigned.
+
+  database_cross_reference:
+    range: string
+    array: { }

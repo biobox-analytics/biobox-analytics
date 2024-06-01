@@ -1,11 +1,22 @@
-id: https://ontology.biobox.io/schemas/chipseq
+id: https://ontology.biobox.io/linkml/chipseq
 name: chipseq
+prefixes:
+  bx: https://ontology.biobox.io/linkml/
+  linkml: https://w3id.org/linkml/
 imports:
+  - linkml:types
   - ./base
 
 classes:
-  ChipSeq:
+
+  Experiment:
     is_a: Object
+
+  Epigenetic Experiment:
+    is_a: Experiment
+
+  ChipSeq:
+    is_a: Epigenetic Experiment
     description: >-
       A method to determine the genomic regions that proteins bind to.
 
@@ -19,13 +30,61 @@ classes:
     is_a: Protein
     description: >-
       A protein that has a post-translational modification.
-  
+    attributes:
+      modification_type:
+
+
   Sample:
     is_a: Object
 
+  Peak:
+    is_a: Object
 
-  
-  
+  Genome:
+    is_a: Object
+
+  GenomicInterval:
+    is_a: Object
+    slots:
+      - chr
+      - start
+      - end
+
+
+  NarrowPeak:
+    is_a: Peak
+    description: >-
+      Peaks of signal enrichment based on pooled, normalized (interpreted) data. It is a BED6+4 format.
+    slots:
+      - chr
+      - start
+      - end
+      - strand
+    attributes:
+      score:
+        range: integer
+        description: >-
+          Indicates how dark the peak will be displayed in the browser (0-1000). 
+          If all scores were "'0"' when the data were submitted to the DCC, 
+          the DCC assigned scores 1-1000 based on signal value. 
+          Ideally the average signalValue per base spread is between 100-1000.
+      signalValue:
+        range: float
+        description: >-
+          Measurement of overall (usually, average) enrichment for the region.
+      pValue:
+        range: float
+        description: >-
+          Measurement of statistical significance (-log10). Use -1 if no pValue is assigned.
+      qValue:
+        range: float
+        description: >-
+          Measurement of statistical significance using false discovery rate (-log10). Use -1 if no qValue is assigned.
+      peak:
+        range: integer
+        description: >-
+          Point-source called for this peak; 0-based offset _from chromStart. Use -1 if no point-source called.
+
   # Edges
 
   has translation:
@@ -33,7 +92,7 @@ classes:
     description: >-
       A gene has a translation to a protein.
     slot_usage:
-      from:
+      _from:
         range: Gene
       to:
         range: Protein
@@ -43,8 +102,45 @@ classes:
     description: >-
       Describes the target for the immuno-precipitation and/or pull down assay.
     slot_usage:
-      from:
+      _from:
         range: ChipSeq
       to:
         range: Protein
 
+  peak detected _from:
+    is_a: Edge
+    description: >-
+      Describes the relationship between a peak (Narrow, Gap, Broad) and the originating sequencing dataset.
+    slot_usage:
+      _from:
+        range: Peak
+      to:
+        range: Experiment
+
+slots:
+  chr:
+    range: string
+    description: >-
+      Name of the chromosome (or contig, scaffold, etc.)
+
+  start:
+    range: integer
+    description: >-
+      The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 0
+
+  end:
+    range: integer
+    description: >-
+      The ending position of the feature in the chromosome or scaffold.
+      The chromEnd base is not included in the display of the feature.
+      For example, the first 100 bases of a chromosome are defined as chromStart=0, chromEnd=100, 
+      and span the bases numbered 0-99.
+
+  strand:
+    range: string
+    description: >-
+      +/- to denote strand or orientation (whenever applicable). Use "." if no orientation is assigned.
+
+  database_cross_reference:
+    range: string
+    array: { }
