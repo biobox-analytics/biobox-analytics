@@ -1,6 +1,8 @@
 id: https://ontology.biobox.io/linkml/genome
 name: genome
+default_prefix: bx
 prefixes:
+  bx: https://ontology.biobox.io/linkml/
   linkml: https://w3id.org/linkml/
 imports:
   - linkml:types
@@ -33,6 +35,16 @@ classes:
 
   Protein:
     is_a: Object
+
+  has translation:
+    is_a: Edge
+    slot_usage:
+      _from:
+        range: Transcript
+        required: true
+      to:
+        range: Protein
+        required: true
 
 slots:
   chr:

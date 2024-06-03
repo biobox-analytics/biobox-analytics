@@ -1,5 +1,6 @@
 id: https://ontology.biobox/io/linkml/go
 name: go
+default_prefix: bx
 prefixes:
   bx: https://ontology.biobox.io/linkml/
   linkml: https://w3id.org/linkml/
@@ -45,7 +46,7 @@ classes:
   enables:
     is_a: Edge
     slot_usage:
-      __from:
+      _from:
         range: Gene
       to:
         range: MolecularFunction
@@ -53,7 +54,7 @@ classes:
   located in:
     is_a: Edge
     slot_usage:
-      __from:
+      _from:
         range: Gene
       to:
         range: CellularComponent
@@ -61,7 +62,7 @@ classes:
   involved in:
     is_a: Edge
     slot_usage:
-      __from:
+      _from:
         range: Gene
       to:
         range: BiologicalProcess
@@ -69,7 +70,7 @@ classes:
   part of:
     is_a: Edge
     slot_usage:
-      __from:
+      _from:
         range: Gene
       to:
         range: CellularComponent
@@ -199,21 +200,33 @@ classes:
     slot_usage:
       _from:
         range: Gene
+        required: true
       to:
         range: MolecularFunction
+        required: true
 
   not acts upstream of or within negative effect:
     is_a: Edge
     slot_usage:
       _from:
         range: Gene
+        required: true
       to:
         range: BiologicalProcess
+        required: true
 
   not is active in:
     is_a: Edge
     slot_usage:
       _from:
         range: Gene
+        required: true
       to:
         range: CellularComponent
+        required: true
+
+slots:
+
+  database_cross_reference:
+    range: string
+    array: { }

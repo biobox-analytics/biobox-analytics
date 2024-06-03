@@ -1,58 +1,22 @@
 id: https://ontology.biobox.io/linkml/chipseq
 name: chipseq
+default_prefix: bx
 prefixes:
   bx: https://ontology.biobox.io/linkml/
   linkml: https://w3id.org/linkml/
 imports:
   - linkml:types
   - ./base
+  - ./genome
 
 classes:
-
-  Experiment:
-    is_a: Object
-
-  Epigenetic Experiment:
-    is_a: Experiment
-
   ChipSeq:
-    is_a: Epigenetic Experiment
+    is_a: EpigeneticExperiment
     description: >-
       A method to determine the genomic regions that proteins bind to.
 
-  Gene:
-    is_a: Object
-
-  Protein:
-    is_a: Object
-
-  ModifiedProtein:
-    is_a: Protein
-    description: >-
-      A protein that has a post-translational modification.
-    attributes:
-      modification_type:
-
-
-  Sample:
-    is_a: Object
-
-  Peak:
-    is_a: Object
-
-  Genome:
-    is_a: Object
-
-  GenomicInterval:
-    is_a: Object
-    slots:
-      - chr
-      - start
-      - end
-
-
-  NarrowPeak:
-    is_a: Peak
+  narrow peak on:
+    is_a: Edge
     description: >-
       Peaks of signal enrichment based on pooled, normalized (interpreted) data. It is a BED6+4 format.
     slots:
@@ -60,6 +24,11 @@ classes:
       - start
       - end
       - strand
+    slot_usage:
+      _from:
+        range: EpigeneticExperiment
+      to:
+        range: GenomicInterval
     attributes:
       score:
         range: integer
@@ -87,16 +56,6 @@ classes:
 
   # Edges
 
-  has translation:
-    is_a: Edge
-    description: >-
-      A gene has a translation to a protein.
-    slot_usage:
-      _from:
-        range: Gene
-      to:
-        range: Protein
-
   assay target on:
     is_a: Edge
     description: >-
@@ -106,41 +65,14 @@ classes:
         range: ChipSeq
       to:
         range: Protein
-
-  peak detected _from:
-    is_a: Edge
-    description: >-
-      Describes the relationship between a peak (Narrow, Gap, Broad) and the originating sequencing dataset.
-    slot_usage:
-      _from:
-        range: Peak
-      to:
-        range: Experiment
+    attributes:
+      
 
 slots:
-  chr:
-    range: string
-    description: >-
-      Name of the chromosome (or contig, scaffold, etc.)
+  modification_type:
+    range: ModificationTypes
 
-  start:
-    range: integer
-    description: >-
-      The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 0
-
-  end:
-    range: integer
-    description: >-
-      The ending position of the feature in the chromosome or scaffold.
-      The chromEnd base is not included in the display of the feature.
-      For example, the first 100 bases of a chromosome are defined as chromStart=0, chromEnd=100, 
-      and span the bases numbered 0-99.
-
-  strand:
-    range: string
-    description: >-
-      +/- to denote strand or orientation (whenever applicable). Use "." if no orientation is assigned.
-
-  database_cross_reference:
-    range: string
-    array: { }
+enums:
+  ModificationTypes:
+    permissible_values:
+      PTM:

@@ -9,9 +9,6 @@ imports:
   - linkml:types
 
 classes:
-  Any:
-    class_uri: linkml:Any
-
   Object:
     slots:
       - uuid
@@ -21,32 +18,30 @@ classes:
       - dateUpdated
 
   Node:
-    attributes:
-      _id:
-        range: string
-        identifier: true
-      labels:
-        range: string
-        array:
-          minimum_number_dimensions: 1
-      properties:
-        range: Any
+    slots:
+      - _id
+      - labels
 
   Edge:
-    attributes:
-      _from:
-        range: Object
-      to:
-        range: Object
-      label:
-        range: string
-        required: true
-      properties:
-        range: Any
+    slots:
+      - _from
+      - to
+      - label
+
+  Sample:
+    is_a: Object
+
+  Donor:
+    is_a: Object
+
+  Experiment:
+    is_a: Object
+
+  EpigeneticExperiment:
+    is_a: Experiment
 
 slots:
   uuid:
-    identifier: true
     range: string
 
   displayName:
@@ -62,29 +57,23 @@ slots:
   dateUpdated:
     range: datetime
 
-  chr:
+  _from:
+    required: true
+    range: Object
+
+  to:
+    required: true
+    range: Object
+
+  label:
+    required: true
     range: string
-    description: >-
-      Name of the chromosome (or contig, scaffold, etc.)
 
-  start:
-    range: integer
-    description: >-
-      The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 0
-
-  end:
-    range: integer
-    description: >-
-      The ending position of the feature in the chromosome or scaffold.
-      The chromEnd base is not included in the display of the feature.
-      For example, the first 100 bases of a chromosome are defined as chromStart=0, chromEnd=100, 
-      and span the bases numbered 0-99.
-
-  strand:
+  _id:
+    required: true
     range: string
-    description: >-
-      +/- to denote strand or orientation (whenever applicable). Use "." if no orientation is assigned.
 
-  database_cross_reference:
+  labels:
     range: string
-    array: { }
+    array:
+      minimum_number_dimensions: 1
