@@ -187,9 +187,9 @@ class Genome(Object):
 class GenomicInterval(Object):
     chr: Optional[str] = Field(None, description="""Name of the chromosome (or contig, scaffold, etc.)""")
     start: Optional[int] = Field(None,
-                                 description="""The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 0""")
+                                 description="""The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 1""")
     end: Optional[int] = Field(None,
-                               description="""The ending position of the feature in the chromosome or scaffold. The chromEnd base is not included in the display of the feature. For example, the first 100 bases of a chromosome are defined as chromStart=0, chromEnd=100,  and span the bases numbered 0-99.""")
+                               description="""The ending position of the feature in the chromosome or scaffold. The chromEnd base is not included in the display of the feature. For example, the first 100 bases of a chromosome are defined as chromStart=1, chromEnd=100,  and span the bases numbered 1-100.""")
     taxon: int = Field(...)
     species: str = Field(..., description="""Is the full species name is lower case (e.g. homo sapiens)""")
     uuid: Optional[str] = Field(None)
@@ -261,9 +261,9 @@ class NarrowPeakOn(Edge):
     """
     chr: Optional[str] = Field(None, description="""Name of the chromosome (or contig, scaffold, etc.)""")
     start: Optional[int] = Field(None,
-                                 description="""The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 0""")
+                                 description="""The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 1""")
     end: Optional[int] = Field(None,
-                               description="""The ending position of the feature in the chromosome or scaffold. The chromEnd base is not included in the display of the feature. For example, the first 100 bases of a chromosome are defined as chromStart=0, chromEnd=100,  and span the bases numbered 0-99.""")
+                               description="""The ending position of the feature in the chromosome or scaffold. The chromEnd base is not included in the display of the feature. For example, the first 100 bases of a chromosome are defined as chromStart=1, chromEnd=100,  and span the bases numbered 1-100.""")
     strand: Optional[str] = Field(None,
                                   description="""+/- to denote strand or orientation (whenever applicable). Use \".\" if no orientation is assigned.""")
     score: Optional[int] = Field(None,

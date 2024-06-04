@@ -14,6 +14,7 @@ classes:
     slots:
       - assembly
       - taxon
+      - species
 
   GenomicInterval:
     is_a: Object
@@ -29,12 +30,28 @@ classes:
     description: >-
       A region (or regions) that includes all of the sequence elements necessary to encode a functional transcript. 
       A gene may include regulatory regions, transcribed regions and/or other functional sequence regions.
+    slots:
+      - chr
+      - start
+      - end
+      - assembly
+      - taxon
+      - strand
 
   Transcript:
     is_a: Object
+    slots:
+      - chr
+      - start
+      - end
+      - assembly
+      - taxon
 
   Protein:
     is_a: Object
+    slots:
+      - assembly
+      - taxon
 
   has translation:
     is_a: Edge
@@ -55,15 +72,15 @@ slots:
   start:
     range: integer
     description: >-
-      The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 0
+      The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 1
 
   end:
     range: integer
     description: >-
       The ending position of the feature in the chromosome or scaffold.
       The chromEnd base is not included in the display of the feature.
-      For example, the first 100 bases of a chromosome are defined as chromStart=0, chromEnd=100, 
-      and span the bases numbered 0-99.
+      For example, the first 100 bases of a chromosome are defined as chromStart=1, chromEnd=100, 
+      and span the bases numbered 1-100.
 
   strand:
     range: string
