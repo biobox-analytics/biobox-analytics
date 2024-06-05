@@ -1,0 +1,1 @@
+from biobox_analytics.data.adapters.genome import GenomeAdapter

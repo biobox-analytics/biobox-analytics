@@ -110,12 +110,14 @@ class Object(ConfiguredBaseModel):
 
 
 class Node(ConfiguredBaseModel):
-    _id: str = Field(...)
+    # usage -> output must be _id but python build errors occur
+    id: str = Field(...)
     labels: Optional[AnyShapeArray[str]] = Field(None)
 
 
 class Edge(ConfiguredBaseModel):
-    _from: Object = Field(...)
+    # usage -> output must be from but python build errors occur
+    from_: Object = Field(...)
     to: Object = Field(...)
     label: str = Field(...)
 
@@ -217,19 +219,19 @@ class Protein(Object):
 
 
 class GenomeContainsInterval(Edge):
-    _from: Genome = Field(...)
+    from_: Genome = Field(...)
     to: GenomicInterval = Field(...)
     label: str = Field(...)
 
 
 class HasTranslation(Edge):
-    _from: Transcript = Field(...)
+    from_: Transcript = Field(...)
     to: Protein = Field(...)
     label: str = Field(...)
 
 
 class TranscribedTo(Edge):
-    _from: Gene = Field(...)
+    from_: Gene = Field(...)
     to: Transcript = Field(...)
     label: str = Field(...)
 

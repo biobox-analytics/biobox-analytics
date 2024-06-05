@@ -1,5 +1,5 @@
 from biobox_analytics.data.adapters._base import Adapter
-import _structs as structs
+import biobox_analytics.data.adapters.genome._structs as structs
 import json
 import requests
 import os
@@ -14,59 +14,57 @@ class GenomeAdapter(Adapter):
     def __init__(self, species='homo sapiens', node_filename='node.jsonl.gz', edge_filename='edge.jsonl.gz' ):
         super().__init__()
         self.species = species
-        self.assembly = None
-        self.karyotypes = None
+        self.assembly = ""
+        self.karyotypes = ""
         self.chromosome_regions = []
         self.nodes = []
         self.edges = []
         self.node_filename = node_filename
         self.edge_filename = edge_filename
+        self._gtfloaded = False
         self.taxon = self.__get_taxonid()
         self.__get_ensembl_assembly_info()
-        dateCreated = datetime()
+        # dateCreated = str(datetime.now().isoformat())
         self.genome = structs.Genome(
             uuid=f"genome_{self.assembly}",
+            displayName=f"{self.species} - {self.assembly}",
             species=self.species,
             taxon=self.taxon,
-            dateCreated=dateCreated,
+            # dateCreated=dateCreated,
             assembly=self.assembly
         )
     
-    @property
-    def chromosome_regions(self):
-        return self.chromosome_regions
+    # @property
+    # def chromosome_regions(self):
+    #     return self.chromosome_regions
     
-    @property
-    def taxon(self):
-        return self.taxon
+    # @property
+    # def taxon(self):
+    #     return self.taxon
     
-    @property
-    def assembly(self):
-        return self.assembly
+    # @property
+    # def assembly(self):
+    #     return self.assembly
     
-    @property
-    def karyotypes(self):
-        return self.karyotypes
+    # @property
+    # def karyotypes(self):
+    #     return self.karyotypes
     
-    @property
-    def chromosome_regions(self):
-        return self.chromosome_regions
+    # @property
+    # def gtf_file(self):
+    #     return self.gtf_file
     
-    @property
-    def gtf_file(self):
-        return self.gtf_file
+    # @property
+    # def nodes(self):
+    #     return self.nodes
     
-    @property
-    def nodes(self):
-        return self.nodes
+    # @property
+    # def edges(self):
+    #     return self.edges
     
-    @property
-    def edges(self):
-        return self.edges
-    
-    @property
-    def genome(self):
-        return self.genome
+    # @property
+    # def genome(self):
+    #     return self.genome
 
     def __get_taxonid(self):
         species = self.species
@@ -114,6 +112,7 @@ class GenomeAdapter(Adapter):
             return
         
         urllib.request.urlretrieve(url, 'genome.gtf.gz')
+
 
     def _generate_genomic_interval_nodes(self):
         genomicIntervals = []
@@ -216,15 +215,48 @@ class GenomeAdapter(Adapter):
         return protein_distinct
     
     def iterate_nodes(self, gtf_file_path = "genome.gtf.gz"):
+        genome = [
+            {
+                "_id": self.genome.uuid,
+                "labels": ["Genome"],
+                "properties": {
+                    "displayName": self.genome.displayName,
+                    "assembly": self.genome.assembly,
+                    "taxon": self.genome.taxon
+                }
+            }
+        ]
         genomic_intervals = self._generate_genomic_interval_nodes()
         # Load gtf file into dataframe before processing genes, transcripts, proteins
         self._gtf = read_gtf(gtf_file_path)
+        self._gtfloaded = True
         genes = self._generate_gene_nodes()
         transcripts = self._generate_transcript_nodes()
         proteins = self._generate_protein_nodes()
-        allNodes = [genomic_intervals, genes, transcripts, proteins]
+        allNodes = [genome, genomic_intervals, genes, transcripts, proteins]
         self.nodes = list(itertools.chain(*allNodes))
         return self.nodes
+    
+    def _generate_genome_to_genomic_interval_edges(self):
+        edges = []
+        for chrom in self.chromosome_regions:
+            maxCoord = math.ceil(chrom['length']/1000)
+            for i in range(maxCoord):
+                start = (i*1000) + 1
+                if (i+1)==(maxCoord):
+                    end = chrom['length']
+                else:
+                    end = (i+1)*1000
+                edges.append({
+                    "from": {
+                        "uuid": self.genome.uuid,
+                    },
+                    "to": {
+                        "uuid": f"{self.taxon}:{chrom['name']}:{start}-{end}",
+                    },
+                    "label": "genome contains interval"
+                })
+        return edges
     
     def _generate_genomic_interval_edges(self):
         # Generate edges between adjacent genomic coordinates
@@ -285,10 +317,14 @@ class GenomeAdapter(Adapter):
         return edges
 
     def iterate_edges(self):
+        if self._gtfloaded == False:
+            print("Run iterate_nodes() to load in the gtf file, prior to this function being callable")
+            return
+        gene_genomic_edges = self._generate_genome_to_genomic_interval_edges()
         genomic_coordinate_edges = self._generate_genomic_interval_edges()
         gene_transcript_edges = self._generate_gene_transcript_edges()
         transcript_protein_edges = self._generate_transcript_protein_edges()
-        allEdges = [genomic_coordinate_edges, gene_transcript_edges, transcript_protein_edges]
+        allEdges = [gene_genomic_edges, genomic_coordinate_edges, gene_transcript_edges, transcript_protein_edges]
         self.edges = list(itertools.chain(*allEdges))
         return self.edges
 
@@ -303,7 +339,7 @@ class GenomeAdapter(Adapter):
     def describe_edge_properties(self):
         pass
 
-    def write_serialized_data_to_file(self, directory):
+    def write_serialized_data_to_file(self, directory=""):
         node_filepath = os.path.join(directory, self.node_filename)
         edge_filepath = os.path.join(directory, self.edge_filename)
 
