@@ -11,7 +11,7 @@ from datetime import datetime
 import itertools
 
 class GenomeAdapter(Adapter):
-    def __init__(self, species='homo sapiens', node_filename='node.jsonl', edge_filename='edge.jsonl' ):
+    def __init__(self, species='homo sapiens', node_filename='node.jsonl.gz', edge_filename='edge.jsonl.gz' ):
         super().__init__()
         self.species = species
         self.assembly = None
