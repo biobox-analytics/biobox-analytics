@@ -1,6 +1,5 @@
 from biobox_analytics.data.adapters._base import Adapter
 import _structs as structs
-import rdflib
 import json
 import requests
 import os
@@ -9,6 +8,7 @@ import math
 from gtfparse import read_gtf
 import urllib.request
 from datetime import datetime
+import itertools
 
 class GenomeAdapter(Adapter):
     def __init__(self, species='homo sapiens', node_filename='node.jsonl', edge_filename='edge.jsonl' ):
@@ -17,6 +17,8 @@ class GenomeAdapter(Adapter):
         self.assembly = None
         self.karyotypes = None
         self.chromosome_regions = []
+        self.nodes = []
+        self.edges = []
         self.node_filename = node_filename
         self.edge_filename = edge_filename
         self.taxon = self.__get_taxonid()
@@ -53,6 +55,14 @@ class GenomeAdapter(Adapter):
     @property
     def gtf_file(self):
         return self.gtf_file
+    
+    @property
+    def nodes(self):
+        return self.nodes
+    
+    @property
+    def edges(self):
+        return self.edges
     
     @property
     def genome(self):
@@ -191,16 +201,30 @@ class GenomeAdapter(Adapter):
     
     def _generate_protein_nodes(self):
         protein = self._gtf.filter(self._gtf["protein_id"] != "")
-        return []
+        protein_subset = protein.select(['transcript_id', 'protein_id']).unique()
+        protein_distinct = []
+        for p in protein_subset.iter_rows(named=True):
+            protein_distinct.append({
+                "_id": p['protein_id'],
+                "labels": ["Protein"],
+                "properties": {
+                    "displayName": p['protein_id'],
+                    "assembly": self.assembly,
+                    "taxon": self.taxon,
+                }
+            })
+        return protein_distinct
     
     def iterate_nodes(self, gtf_file_path = "genome.gtf.gz"):
-        self.genomic_intervals = self._generate_genomic_interval_nodes()
+        genomic_intervals = self._generate_genomic_interval_nodes()
         # Load gtf file into dataframe before processing genes, transcripts, proteins
         self._gtf = read_gtf(gtf_file_path)
-        self.genes = self._generate_gene_nodes()
-        self.transcripts = self._generate_transcript_nodes()
-        self.proteins = self._generate_protein_nodes()
-        # write chromosome regions to jsonl file
+        genes = self._generate_gene_nodes()
+        transcripts = self._generate_transcript_nodes()
+        proteins = self._generate_protein_nodes()
+        allNodes = [genomic_intervals, genes, transcripts, proteins]
+        self.nodes = list(itertools.chain(*allNodes))
+        return self.nodes
     
     def _generate_genomic_interval_edges(self):
         # Generate edges between adjacent genomic coordinates
@@ -228,9 +252,45 @@ class GenomeAdapter(Adapter):
                     "label": "next"
                 })
         return coordinateEdges
+    
+    def _generate_gene_transcript_edges(self):
+        transcripts = self._gtf.filter(feature='transcript')
+        edges = []
+        for t in transcripts.iter_rows(named=True):
+            edges.append({
+                "from": {
+                    "uuid": t["gene_id"],
+                },
+                "to": {
+                    "uuid": t["transcript_id"],
+                },
+                "label": "transcribed to"
+            })
+        return edges
+    
+    def _generate_transcript_protein_edges(self):
+        protein = self._gtf.filter(self._gtf["protein_id"] != "")
+        protein_subset = protein.select(['transcript_id', 'protein_id']).unique()
+        edges = []
+        for t in protein_subset.iter_rows(named=True):
+            edges.append({
+                "from": {
+                    "uuid": t["transcript_id"],
+                },
+                "to": {
+                    "uuid": t["protein_id"],
+                },
+                "label": "has translation"
+            })
+        return edges
 
     def iterate_edges(self):
         genomic_coordinate_edges = self._generate_genomic_interval_edges()
+        gene_transcript_edges = self._generate_gene_transcript_edges()
+        transcript_protein_edges = self._generate_transcript_protein_edges()
+        allEdges = [genomic_coordinate_edges, gene_transcript_edges, transcript_protein_edges]
+        self.edges = list(itertools.chain(*allEdges))
+        return self.edges
 
     def process_item(self, item):
         """Processes a single item (node or edge)."""

@@ -53,6 +53,16 @@ classes:
       - assembly
       - taxon
 
+  genome contains interval:
+    is_a: Edge
+    slot_usage:
+      _from:
+        range: Genome
+        required: true
+      to:
+        range: GenomicInterval
+        required: true
+
   has translation:
     is_a: Edge
     slot_usage:
@@ -61,6 +71,16 @@ classes:
         required: true
       to:
         range: Protein
+        required: true
+
+  transcribed to:
+    is_a: Edge
+    slot_usage:
+      _from:
+        range: Gene
+        required: true
+      to:
+        range: Transcript
         required: true
 
 slots:

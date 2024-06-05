@@ -180,8 +180,12 @@ class Gene(Object):
     """
     A region (or regions) that includes all of the sequence elements necessary to encode a functional transcript.  A gene may include regulatory regions, transcribed regions and/or other functional sequence regions.
     """
+    chr: Optional[str] = Field(None, description="""Name of the chromosome (or contig, scaffold, etc.)""")
+    start: Optional[int] = Field(None, description="""The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 1""")
+    end: Optional[int] = Field(None, description="""The ending position of the feature in the chromosome or scaffold. The chromEnd base is not included in the display of the feature. For example, the first 100 bases of a chromosome are defined as chromStart=1, chromEnd=100,  and span the bases numbered 1-100.""")
     assembly: Optional[str] = Field(None)
     taxon: int = Field(...)
+    strand: Optional[str] = Field(None, description="""+/- to denote strand or orientation (whenever applicable). Use \".\" if no orientation is assigned.""")
     uuid: Optional[str] = Field(None)
     displayName: str = Field(...)
     description: Optional[str] = Field(None)
@@ -190,6 +194,9 @@ class Gene(Object):
 
 
 class Transcript(Object):
+    chr: Optional[str] = Field(None, description="""Name of the chromosome (or contig, scaffold, etc.)""")
+    start: Optional[int] = Field(None, description="""The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 1""")
+    end: Optional[int] = Field(None, description="""The ending position of the feature in the chromosome or scaffold. The chromEnd base is not included in the display of the feature. For example, the first 100 bases of a chromosome are defined as chromStart=1, chromEnd=100,  and span the bases numbered 1-100.""")
     assembly: Optional[str] = Field(None)
     taxon: int = Field(...)
     uuid: Optional[str] = Field(None)
@@ -209,9 +216,21 @@ class Protein(Object):
     dateUpdated: Optional[datetime ] = Field(None)
 
 
+class GenomeContainsInterval(Edge):
+    _from: Genome = Field(...)
+    to: GenomicInterval = Field(...)
+    label: str = Field(...)
+
+
 class HasTranslation(Edge):
     _from: Transcript = Field(...)
     to: Protein = Field(...)
+    label: str = Field(...)
+
+
+class TranscribedTo(Edge):
+    _from: Gene = Field(...)
+    to: Transcript = Field(...)
     label: str = Field(...)
 
 
@@ -229,5 +248,7 @@ GenomicInterval.model_rebuild()
 Gene.model_rebuild()
 Transcript.model_rebuild()
 Protein.model_rebuild()
+GenomeContainsInterval.model_rebuild()
 HasTranslation.model_rebuild()
+TranscribedTo.model_rebuild()
 
