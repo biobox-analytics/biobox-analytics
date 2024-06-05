@@ -113,7 +113,6 @@ class GenomeAdapter(Adapter):
         
         urllib.request.urlretrieve(url, 'genome.gtf.gz')
 
-
     def _generate_genomic_interval_nodes(self):
         genomicIntervals = []
         for chrom in self.chromosome_regions:
@@ -129,7 +128,7 @@ class GenomeAdapter(Adapter):
                     "labels": ["GenomicInterval"],
                     "properties": {
                         "uuid": f"{self.taxon}:{chrom['name']}:{start}-{end}",
-                        "displayName": f"{self.species} {chrom}:{start}-{end}",
+                        "displayName": f"{self.species} {chrom}['name']:{start}-{end}",
                         "taxon": self.taxon,
                         "species": self.species,
                         # "assembly": decoded['assembly_name'],
@@ -338,6 +337,9 @@ class GenomeAdapter(Adapter):
 
     def describe_edge_properties(self):
         pass
+    
+    def list_schema(self):
+        return None
 
     def write_serialized_data_to_file(self, directory=""):
         node_filepath = os.path.join(directory, self.node_filename)
