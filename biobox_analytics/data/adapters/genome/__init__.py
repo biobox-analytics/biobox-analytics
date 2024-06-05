@@ -128,7 +128,7 @@ class GenomeAdapter(Adapter):
                     "labels": ["GenomicInterval"],
                     "properties": {
                         "uuid": f"{self.taxon}:{chrom['name']}:{start}-{end}",
-                        "displayName": f"{self.species} {chrom}['name']:{start}-{end}",
+                        "displayName": f"{self.species} {chrom['name']}:{start}-{end}",
                         "taxon": self.taxon,
                         "species": self.species,
                         # "assembly": decoded['assembly_name'],
