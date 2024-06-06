@@ -15,8 +15,8 @@ classes:
     description: >-
       A method to determine the genomic regions that proteins bind to.
 
-  narrow peak on:
-    is_a: Edge
+  NarrowPeak:
+    is_a: Object
     description: >-
       Peaks of signal enrichment based on pooled, normalized (interpreted) data. It is a BED6+4 format.
     slots:
@@ -24,11 +24,6 @@ classes:
       - start
       - end
       - strand
-    slot_usage:
-      _from:
-        range: EpigeneticExperiment
-      to:
-        range: GenomicInterval
     attributes:
       score:
         range: integer
@@ -66,7 +61,57 @@ classes:
       to:
         range: Protein
     attributes:
-      
+      modification:
+        range: string
+      position:
+        range: integer
+      residue:
+        range: string
+    slots:
+      - modification_type
+
+  has experiment:
+    is_a: Edge
+    description: >-
+      Sample has experiment
+    slot_usage:
+      _from:
+        range: Sample
+      to:
+        range: ChipSeq
+
+  has peak:
+    is_a: Edge
+    description: >-
+      seq experiment that generated bed peaks
+    slot_usage:
+      _from:
+        range: ChipSeq
+      to:
+        range: NarrowPeak
+
+  peak start on:
+    is_a: Edge
+    description: >-
+      maps the starting position of the peak coverage interval
+    slot_usage:
+      _from:
+        range: ChipSeq
+      to:
+        range: GenomicInterval
+
+  peak end on:
+    is_a: Edge
+    description: >-
+      maps the end position of the peak coverage interval
+    slot_usage:
+      _from:
+        range: ChipSeq
+      to:
+        range: GenomicInterval
+
+
+
 
 slots:
   modification_type:
