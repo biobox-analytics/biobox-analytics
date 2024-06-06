@@ -1,15 +1,14 @@
-from __future__ import annotations
+from __future__ import annotations 
 from datetime import (
     datetime,
     date
 )
-from decimal import Decimal
-from enum import Enum
+from decimal import Decimal 
+from enum import Enum 
 import re
 import sys
-from pydantic.version import VERSION as PYDANTIC_VERSION
-
-if int(PYDANTIC_VERSION[0]) >= 2:
+from pydantic.version import VERSION  as PYDANTIC_VERSION 
+if int(PYDANTIC_VERSION[0])>=2:
     from pydantic import (
         BaseModel,
         ConfigDict,
@@ -34,7 +33,6 @@ from typing import (
     TypeVar,
     _GenericAlias
 )
-
 metamodel_version = "None"
 version = "None"
 
@@ -42,14 +40,13 @@ version = "None"
 class WeakRefShimBaseModel(BaseModel):
     __slots__ = '__weakref__'
 
-
 class ConfiguredBaseModel(WeakRefShimBaseModel,
-                          validate_assignment=True,
-                          validate_all=True,
-                          underscore_attrs_are_private=True,
-                          extra="forbid",
-                          arbitrary_types_allowed=True,
-                          use_enum_values=True):
+                validate_assignment = True,
+                validate_all = True,
+                underscore_attrs_are_private = True,
+                extra = "forbid",
+                arbitrary_types_allowed = True,
+                use_enum_values = True):
     pass
 
 
@@ -58,7 +55,6 @@ class ModificationTypes(str, Enum):
 
 
 _T = TypeVar("_T")
-
 
 class AnyShapeArray(Generic[_T]):
     type_: Type[Any] = Any
@@ -127,8 +123,8 @@ class Object(ConfiguredBaseModel):
     uuid: Optional[str] = Field(None)
     displayName: str = Field(...)
     description: Optional[str] = Field(None)
-    dateCreated: Optional[datetime] = Field(None)
-    dateUpdated: Optional[datetime] = Field(None)
+    dateCreated: Optional[datetime ] = Field(None)
+    dateUpdated: Optional[datetime ] = Field(None)
 
 
 class Node(ConfiguredBaseModel):
@@ -146,89 +142,113 @@ class Sample(Object):
     uuid: Optional[str] = Field(None)
     displayName: str = Field(...)
     description: Optional[str] = Field(None)
-    dateCreated: Optional[datetime] = Field(None)
-    dateUpdated: Optional[datetime] = Field(None)
+    dateCreated: Optional[datetime ] = Field(None)
+    dateUpdated: Optional[datetime ] = Field(None)
 
 
 class Donor(Object):
     uuid: Optional[str] = Field(None)
     displayName: str = Field(...)
     description: Optional[str] = Field(None)
-    dateCreated: Optional[datetime] = Field(None)
-    dateUpdated: Optional[datetime] = Field(None)
+    dateCreated: Optional[datetime ] = Field(None)
+    dateUpdated: Optional[datetime ] = Field(None)
 
 
 class Experiment(Object):
     uuid: Optional[str] = Field(None)
     displayName: str = Field(...)
     description: Optional[str] = Field(None)
-    dateCreated: Optional[datetime] = Field(None)
-    dateUpdated: Optional[datetime] = Field(None)
+    dateCreated: Optional[datetime ] = Field(None)
+    dateUpdated: Optional[datetime ] = Field(None)
 
 
 class EpigeneticExperiment(Experiment):
     uuid: Optional[str] = Field(None)
     displayName: str = Field(...)
     description: Optional[str] = Field(None)
-    dateCreated: Optional[datetime] = Field(None)
-    dateUpdated: Optional[datetime] = Field(None)
+    dateCreated: Optional[datetime ] = Field(None)
+    dateUpdated: Optional[datetime ] = Field(None)
 
 
 class Genome(Object):
     assembly: Optional[str] = Field(None)
     taxon: int = Field(...)
+    species: str = Field(..., description="""Is the full species name is lower case (e.g. homo sapiens)""")
     uuid: Optional[str] = Field(None)
     displayName: str = Field(...)
     description: Optional[str] = Field(None)
-    dateCreated: Optional[datetime] = Field(None)
-    dateUpdated: Optional[datetime] = Field(None)
+    dateCreated: Optional[datetime ] = Field(None)
+    dateUpdated: Optional[datetime ] = Field(None)
 
 
 class GenomicInterval(Object):
     chr: Optional[str] = Field(None, description="""Name of the chromosome (or contig, scaffold, etc.)""")
-    start: Optional[int] = Field(None,
-                                 description="""The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 1""")
-    end: Optional[int] = Field(None,
-                               description="""The ending position of the feature in the chromosome or scaffold. The chromEnd base is not included in the display of the feature. For example, the first 100 bases of a chromosome are defined as chromStart=1, chromEnd=100,  and span the bases numbered 1-100.""")
+    start: Optional[int] = Field(None, description="""The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 1""")
+    end: Optional[int] = Field(None, description="""The ending position of the feature in the chromosome or scaffold. The chromEnd base is not included in the display of the feature. For example, the first 100 bases of a chromosome are defined as chromStart=1, chromEnd=100,  and span the bases numbered 1-100.""")
     taxon: int = Field(...)
     species: str = Field(..., description="""Is the full species name is lower case (e.g. homo sapiens)""")
     uuid: Optional[str] = Field(None)
     displayName: str = Field(...)
     description: Optional[str] = Field(None)
-    dateCreated: Optional[datetime] = Field(None)
-    dateUpdated: Optional[datetime] = Field(None)
+    dateCreated: Optional[datetime ] = Field(None)
+    dateUpdated: Optional[datetime ] = Field(None)
 
 
 class Gene(Object):
     """
     A region (or regions) that includes all of the sequence elements necessary to encode a functional transcript.  A gene may include regulatory regions, transcribed regions and/or other functional sequence regions.
     """
+    chr: Optional[str] = Field(None, description="""Name of the chromosome (or contig, scaffold, etc.)""")
+    start: Optional[int] = Field(None, description="""The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 1""")
+    end: Optional[int] = Field(None, description="""The ending position of the feature in the chromosome or scaffold. The chromEnd base is not included in the display of the feature. For example, the first 100 bases of a chromosome are defined as chromStart=1, chromEnd=100,  and span the bases numbered 1-100.""")
+    assembly: Optional[str] = Field(None)
+    taxon: int = Field(...)
+    strand: Optional[str] = Field(None, description="""+/- to denote strand or orientation (whenever applicable). Use \".\" if no orientation is assigned.""")
     uuid: Optional[str] = Field(None)
     displayName: str = Field(...)
     description: Optional[str] = Field(None)
-    dateCreated: Optional[datetime] = Field(None)
-    dateUpdated: Optional[datetime] = Field(None)
+    dateCreated: Optional[datetime ] = Field(None)
+    dateUpdated: Optional[datetime ] = Field(None)
 
 
 class Transcript(Object):
+    chr: Optional[str] = Field(None, description="""Name of the chromosome (or contig, scaffold, etc.)""")
+    start: Optional[int] = Field(None, description="""The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 1""")
+    end: Optional[int] = Field(None, description="""The ending position of the feature in the chromosome or scaffold. The chromEnd base is not included in the display of the feature. For example, the first 100 bases of a chromosome are defined as chromStart=1, chromEnd=100,  and span the bases numbered 1-100.""")
+    assembly: Optional[str] = Field(None)
+    taxon: int = Field(...)
     uuid: Optional[str] = Field(None)
     displayName: str = Field(...)
     description: Optional[str] = Field(None)
-    dateCreated: Optional[datetime] = Field(None)
-    dateUpdated: Optional[datetime] = Field(None)
+    dateCreated: Optional[datetime ] = Field(None)
+    dateUpdated: Optional[datetime ] = Field(None)
 
 
 class Protein(Object):
+    assembly: Optional[str] = Field(None)
+    taxon: int = Field(...)
     uuid: Optional[str] = Field(None)
     displayName: str = Field(...)
     description: Optional[str] = Field(None)
-    dateCreated: Optional[datetime] = Field(None)
-    dateUpdated: Optional[datetime] = Field(None)
+    dateCreated: Optional[datetime ] = Field(None)
+    dateUpdated: Optional[datetime ] = Field(None)
+
+
+class GenomeContainsInterval(Edge):
+    _from: Genome = Field(...)
+    to: GenomicInterval = Field(...)
+    label: str = Field(...)
 
 
 class HasTranslation(Edge):
     _from: Transcript = Field(...)
     to: Protein = Field(...)
+    label: str = Field(...)
+
+
+class TranscribedTo(Edge):
+    _from: Gene = Field(...)
+    to: Transcript = Field(...)
     label: str = Field(...)
 
 
@@ -239,63 +259,76 @@ class ChipSeq(EpigeneticExperiment):
     uuid: Optional[str] = Field(None)
     displayName: str = Field(...)
     description: Optional[str] = Field(None)
-    dateCreated: Optional[datetime] = Field(None)
-    dateUpdated: Optional[datetime] = Field(None)
+    dateCreated: Optional[datetime ] = Field(None)
+    dateUpdated: Optional[datetime ] = Field(None)
 
 
-class ModifiedProtein(Protein):
-    """
-    A protein that has a post-translational modification.
-    """
-    modification_type: Optional[ModificationTypes] = Field(None)
-    uuid: Optional[str] = Field(None)
-    displayName: str = Field(...)
-    description: Optional[str] = Field(None)
-    dateCreated: Optional[datetime] = Field(None)
-    dateUpdated: Optional[datetime] = Field(None)
-
-
-class NarrowPeakOn(Edge):
+class NarrowPeak(Object):
     """
     Peaks of signal enrichment based on pooled, normalized (interpreted) data. It is a BED6+4 format.
     """
     chr: Optional[str] = Field(None, description="""Name of the chromosome (or contig, scaffold, etc.)""")
-    start: Optional[int] = Field(None,
-                                 description="""The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 1""")
-    end: Optional[int] = Field(None,
-                               description="""The ending position of the feature in the chromosome or scaffold. The chromEnd base is not included in the display of the feature. For example, the first 100 bases of a chromosome are defined as chromStart=1, chromEnd=100,  and span the bases numbered 1-100.""")
-    strand: Optional[str] = Field(None,
-                                  description="""+/- to denote strand or orientation (whenever applicable). Use \".\" if no orientation is assigned.""")
-    score: Optional[int] = Field(None,
-                                 description="""Indicates how dark the peak will be displayed in the browser (0-1000).  If all scores were \"'0\"' when the data were submitted to the DCC,  the DCC assigned scores 1-1000 based on signal value.  Ideally the average signalValue per base spread is between 100-1000.""")
-    signalValue: Optional[float] = Field(None,
-                                         description="""Measurement of overall (usually, average) enrichment for the region.""")
-    pValue: Optional[float] = Field(None,
-                                    description="""Measurement of statistical significance (-log10). Use -1 if no pValue is assigned.""")
-    qValue: Optional[float] = Field(None,
-                                    description="""Measurement of statistical significance using false discovery rate (-log10). Use -1 if no qValue is assigned.""")
-    peak: Optional[int] = Field(None,
-                                description="""Point-source called for this peak; 0-based offset _from chromStart. Use -1 if no point-source called.""")
-    _from: EpigeneticExperiment = Field(...)
-    to: GenomicInterval = Field(...)
-    label: str = Field(...)
-
-
-class IsAModifiedFormOf(Edge):
-    """
-    A gene has a translation to a protein.
-    """
-    _from: ModifiedProtein = Field(...)
-    to: Protein = Field(...)
-    label: str = Field(...)
+    start: Optional[int] = Field(None, description="""The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 1""")
+    end: Optional[int] = Field(None, description="""The ending position of the feature in the chromosome or scaffold. The chromEnd base is not included in the display of the feature. For example, the first 100 bases of a chromosome are defined as chromStart=1, chromEnd=100,  and span the bases numbered 1-100.""")
+    strand: Optional[str] = Field(None, description="""+/- to denote strand or orientation (whenever applicable). Use \".\" if no orientation is assigned.""")
+    score: Optional[int] = Field(None, description="""Indicates how dark the peak will be displayed in the browser (0-1000).  If all scores were \"'0\"' when the data were submitted to the DCC,  the DCC assigned scores 1-1000 based on signal value.  Ideally the average signalValue per base spread is between 100-1000.""")
+    signalValue: Optional[float] = Field(None, description="""Measurement of overall (usually, average) enrichment for the region.""")
+    pValue: Optional[float] = Field(None, description="""Measurement of statistical significance (-log10). Use -1 if no pValue is assigned.""")
+    qValue: Optional[float] = Field(None, description="""Measurement of statistical significance using false discovery rate (-log10). Use -1 if no qValue is assigned.""")
+    peak: Optional[int] = Field(None, description="""Point-source called for this peak; 0-based offset _from chromStart. Use -1 if no point-source called.""")
+    uuid: Optional[str] = Field(None)
+    displayName: str = Field(...)
+    description: Optional[str] = Field(None)
+    dateCreated: Optional[datetime ] = Field(None)
+    dateUpdated: Optional[datetime ] = Field(None)
 
 
 class AssayTargetOn(Edge):
     """
     Describes the target for the immuno-precipitation and/or pull down assay.
     """
+    modification_type: Optional[ModificationTypes] = Field(None)
+    modification: Optional[str] = Field(None)
+    position: Optional[int] = Field(None)
+    residue: Optional[str] = Field(None)
     _from: ChipSeq = Field(...)
     to: Protein = Field(...)
+    label: str = Field(...)
+
+
+class HasExperiment(Edge):
+    """
+    Sample has experiment
+    """
+    _from: Sample = Field(...)
+    to: ChipSeq = Field(...)
+    label: str = Field(...)
+
+
+class HasPeak(Edge):
+    """
+    seq experiment that generated bed peaks
+    """
+    _from: ChipSeq = Field(...)
+    to: NarrowPeak = Field(...)
+    label: str = Field(...)
+
+
+class PeakStartOn(Edge):
+    """
+    maps the starting position of the peak coverage interval
+    """
+    _from: ChipSeq = Field(...)
+    to: GenomicInterval = Field(...)
+    label: str = Field(...)
+
+
+class PeakEndOn(Edge):
+    """
+    maps the end position of the peak coverage interval
+    """
+    _from: ChipSeq = Field(...)
+    to: GenomicInterval = Field(...)
     label: str = Field(...)
 
 
@@ -313,9 +346,14 @@ GenomicInterval.update_forward_refs()
 Gene.update_forward_refs()
 Transcript.update_forward_refs()
 Protein.update_forward_refs()
+GenomeContainsInterval.update_forward_refs()
 HasTranslation.update_forward_refs()
+TranscribedTo.update_forward_refs()
 ChipSeq.update_forward_refs()
-ModifiedProtein.update_forward_refs()
-NarrowPeakOn.update_forward_refs()
-IsAModifiedFormOf.update_forward_refs()
+NarrowPeak.update_forward_refs()
 AssayTargetOn.update_forward_refs()
+HasExperiment.update_forward_refs()
+HasPeak.update_forward_refs()
+PeakStartOn.update_forward_refs()
+PeakEndOn.update_forward_refs()
+
