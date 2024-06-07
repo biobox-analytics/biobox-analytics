@@ -164,6 +164,7 @@ class GenomeAdapter(Adapter):
                 "_id": g['gene_id'],
                 "labels": ["Gene"],
                 "properties": {
+                    "uuid": g['gene_id'],
                     "displayName": name,
                     "chr": g['seqname'],
                     "start": g['start'],
@@ -186,6 +187,7 @@ class GenomeAdapter(Adapter):
                 "_id": t['transcript_id'],
                 "labels": ["Transcript"],
                 "properties": {
+                    "uuid": t['transcript_id'],
                     "displayName": name,
                     "chr": t['seqname'],
                     "start": t['start'],
@@ -206,6 +208,7 @@ class GenomeAdapter(Adapter):
                 "_id": p['protein_id'],
                 "labels": ["Protein"],
                 "properties": {
+                    "uuid": p['protein_id'],
                     "displayName": p['protein_id'],
                     "assembly": self.assembly,
                     "taxon": self.taxon,
@@ -219,9 +222,11 @@ class GenomeAdapter(Adapter):
                 "_id": self.genome.uuid,
                 "labels": ["Genome"],
                 "properties": {
+                    "_id": self.genome.uuid,
                     "displayName": self.genome.displayName,
                     "assembly": self.genome.assembly,
-                    "taxon": self.genome.taxon
+                    "taxon": self.genome.taxon,
+                    "chromosomes": self.chromosome_regions
                 }
             }
         ]
