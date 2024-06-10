@@ -1,0 +1,69 @@
+id: https://ontology.biobox.io/linkml/single_cell
+name: single_cell
+default_range: string
+default_prefix: bx
+prefixes:
+  bx: https://ontology.biobox.io/linkml/
+  linkml: https://w3id.org/linkml/
+imports:
+  - linkml:types
+  - ./base
+  - ./celltype
+  - ./genome
+  - ./chipseq
+
+classes:
+
+  CellBarcode:
+    is_a: Object
+
+  SingleCellRNAseqExperiment:
+    is_a: Experiment
+
+  SingleNucleiRNAseqExperiment:
+    is_a: SingleCellRNAseqExperiment
+
+  SingleCellATACseqExperiment:
+    is_a: Experiment
+
+  #  === EDGES ===
+  has cell type:
+    is_a: Edge
+    slot_usage:
+      _from:
+        range: CellBarcode
+      to:
+        range: CellType
+
+  has experiment:
+    is_a: Edge
+    slot_usage:
+      _from:
+        range: Sample
+      to:
+        range: Experiment
+
+  contains cell:
+    is_a: Edge
+    slot_usage:
+      _from:
+        range: SingleCellRNAseqExperiment
+      to:
+        range: CellBarcode
+
+  expresses:
+    is_a: Edge
+    slot_usage:
+      _from:
+        range: CellBarcode
+      to:
+        range: Gene
+
+  has peak:
+    is_a: Edge
+    slot_usage:
+      _from:
+        range: CellBarcode
+      to:
+        range: NarrowPeak
+  

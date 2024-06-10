@@ -1,0 +1,16 @@
+id: https://ontology.biobox.io/linkml/celltype
+name: celltype
+default_range: string
+default_prefix: bx
+prefixes:
+  bx: https://ontology.biobox.io/linkml/
+  linkml: https://w3id.org/linkml/
+imports:
+  - linkml:types
+  - ./base
+
+classes:
+
+  CellType:
+    is_a: Object
+
