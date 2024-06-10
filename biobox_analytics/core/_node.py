@@ -60,6 +60,8 @@ class Node:
 
     @properties.setter
     def properties(self, adict):
+        print("setting properties")
+        print(adict)
         self._data['properties'].update(adict)
 
     def save(self):
