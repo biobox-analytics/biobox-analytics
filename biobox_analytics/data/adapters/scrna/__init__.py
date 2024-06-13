@@ -1,5 +1,5 @@
 from biobox_analytics.data.adapters._base import Adapter
-import biobox_analytics.data.adapters.scatac._structs as structs
+# import biobox_analytics.data.adapters.scrna._structs as structs
 import json
 import requests
 import os
