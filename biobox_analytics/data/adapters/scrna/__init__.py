@@ -16,8 +16,6 @@ import pandas as pd
 class ScRNA(Adapter):
     def __init__(
         self,
-        analysisID,
-        analysisName,
         h5adFile,
         node_filename='node.jsonl.gz',
         edge_filename='edge.jsonl.gz',
@@ -32,87 +30,90 @@ class ScRNA(Adapter):
         self.enableSampleMetadata = True
         self._cellxgeneedges = []
     
-    def createSampleDataNodes(self, sampleIDColumn, columnsToUse):
+    def pull_data(self):
+        return super().pull_data()
+    
+    def create_sample_nodes(self, sample_id_col, sample_cols_to_subset):
         samples = []
-        for index, row in self.rna.obs[columnsToUse].drop_duplicates(subset=sampleIDColumn).iterrows():
+        for index, row in self.rna.obs[sample_cols_to_subset].drop_duplicates(subset=sample_id_col).iterrows():
             samples.append({
-                "_id": row[sampleIDColumn],
+                "_id": row[sample_id_col],
                 "labels": ["Sample"],
                 "properties": row.to_dict()
             })
         return samples
     
-    def createSingleCellExperimentNodes(self, libraryID, columnsToUse):
+    def create_sc_experiment_library_nodes(self, sc_library_experiment_id, library_experiment_cols_to_subset):
         experiments = []
-        for index, row in self.rna.obs[columnsToUse].drop_duplicates(subset=libraryID).iterrows():
+        for index, row in self.rna.obs[library_experiment_cols_to_subset].drop_duplicates(subset=sc_library_experiment_id).iterrows():
             experiments.append({
-                "_id": row[libraryID],
+                "_id": row[sc_library_experiment_id],
                 "labels": ["SingleCellRNAseqExperiment"],
                 "properties": row.to_dict()
             })
         return experiments
     
-    def createBarcodesNodes(self, libraryID):
+    def create_cell_nodes(self, sc_library_experiment_id):
         barcodes = []
         for index, row in self.rna.obs.iterrows():
             barcodes.append({
-                "_id": f"{row[libraryID]}:{index}",
+                "_id": f"{row[sc_library_experiment_id]}:{index}",
                 "labels": ["CellBarcode"],
                 "properties": {}
             })
         return barcodes
 
-    def iterate_nodes(self, libraryID="library_uuid", sampleID="sample_uuid", singleCellColumnsToUse=["library_uuid"], sampleColumnsToUse=["sample_uuid"]):
-        barcodes = self.createBarcodesNodes(libraryID)
-        singleCellExperiments = self.createSingleCellExperimentNodes(libraryID, singleCellColumnsToUse)
+    def iterate_nodes(self, sc_library_experiment_id="library_uuid", sample_id_col="sample_uuid", sc_experiment_cols_to_subset=["library_uuid"], sample_metadata_cols_to_subset=["sample_uuid"]):
+        barcodes = self.create_cell_nodes(sc_library_experiment_id)
+        singleCellExperiments = self.create_sc_experiment_library_nodes(sc_library_experiment_id, sc_experiment_cols_to_subset)
         samples = []
         if (self.enableSampleMetadata):
-            samples = self.createSampleDataNodes(sampleID, sampleColumnsToUse)
+            samples = self.create_sample_nodes(sample_id_col, sample_metadata_cols_to_subset)
         return list(itertools.chain([barcodes, singleCellExperiments, samples]))
     
-    def createSampleToExperimentConnection(self, libraryID, sampleID):
+    def createSampleToExperimentConnection(self, sc_library_experiment_id, sample_id_col):
         edges = []
-        for index, row in self.rna.obs.drop_duplicates(subset=libraryID).iterrows():
+        for index, row in self.rna.obs.drop_duplicates(subset=sc_library_experiment_id).iterrows():
             edges.append({
                 "from": {
-                    "uuid": row[sampleID]
+                    "uuid": row[sample_id_col]
                 },
                 "to": {
-                    "uuid": row[libraryID]
+                    "uuid": row[sc_library_experiment_id]
                 },
                 "label": "has experiment"
             })
         return edges
     
-    def createExperimentToBarcodeConnection(self, libraryID):
+    def createExperimentToBarcodeConnection(self, sc_library_experiment_id):
         edges = []
         for index, row in self.rna.obs.iterrows():
             edges.append({
                 "from": {
-                    "uuid": row[libraryID]
+                    "uuid": row[sc_library_experiment_id]
                 },
                 "to": {
-                    "uuid": f"{row[libraryID]}:{index}"
+                    "uuid": f"{row[sc_library_experiment_id]}:{index}"
                 },
                 "label": "contains cell"
             })
         return edges
     
-    def createBarcodeToCellTypeConnection(self, libraryID, celltypeID):
+    def createBarcodeToCellTypeConnection(self, sc_library_experiment_id, celltype_id_col):
         edges = []
         for index, row in self.rna.obs.iterrows():
             edges.append({
                 "from": {
-                    "uuid": f"{row[libraryID]}:{index}"
+                    "uuid": f"{row[sc_library_experiment_id]}:{index}"
                 },
                 "to": {
-                    "uuid": row[celltypeID]
+                    "uuid": row[celltype_id_col]
                 },
                 "label": "has cell type"
             })
         return edges
 
-    def process_barcodes_genes(row, barcode):
+    def _process_barcodes_genes(row, barcode):
         return {
             "from": {
                 "uuid": barcode
@@ -126,15 +127,15 @@ class ScRNA(Adapter):
             }
         }
     
-    def process_barcode(self, column, library):
+    def _process_barcode(self, column, library):
         barcode = column.name + ":" + library
         cell = pd.DataFrame(column)
         filtered_cell = cell[cell[column.name] > 0]
         # cell2 = cell.set_axis(['expression'], axis=1)
-        a = filtered_cell.apply(lambda row: self.process_barcodes_genes(row, barcode), axis=1)
+        a = filtered_cell.apply(lambda row: self._process_barcodes_genes(row, barcode), axis=1)
         self._cellxgeneedges.extend(a.tolist())
     
-    def createBarcodeToGeneConnection(self, libraryID):
+    def createBarcodeToGeneConnection(self, sc_library_experiment_id):
         numcells = self.rna.X.shape[0]
         print(f"Number of cells to process: {numcells}")
         print(f"Starting Cell x Gene edge processing now: {datetime.datetime.now()}")
@@ -144,25 +145,25 @@ class ScRNA(Adapter):
             if (high > numcells):
                 high = numcells
             print(f"Processing batch index {low}:{high}")
-            library = self.rna.obs[libraryID][low:high]
+            library = self.rna.obs[sc_library_experiment_id][low:high]
             cell = self.rna.obs.index[low:high]
             cell_uniq = [f"{libi}:{celli}" for libi, celli in zip(library.tolist(), cell.tolist())]
             rowPandas = pd.DataFrame(self.rna.X[low:high].toarray().T, index=self.rna.var.index, columns=cell_uniq)
-            rowPandas.apply(self.process_barcode, axis=0)
+            rowPandas.apply(self._process_barcode, axis=0)
             self.append_to_file(self._cellxgeneedges, filepath=self.edge_filename)
             self._cellxgeneedges = []
         print(f"Cell x Gene edges written to file: {self.edge_filename}")
         return []
 
-    def iterate_edges(self, libraryID="library_uuid", sampleID="sample_uuid", celltypeID="cell_type"):
-        expToBarcodeEdges = self.createExperimentToBarcodeConnection(libraryID)
-        barcodeToGeneEdges = self.createBarcodeToGeneConnection(libraryID)
+    def iterate_edges(self, sc_library_experiment_id="library_uuid", sample_id_col="sample_uuid", celltype_id_col="cell_type"):
+        expToBarcodeEdges = self.createExperimentToBarcodeConnection(sc_library_experiment_id)
+        barcodeToGeneEdges = self.createBarcodeToGeneConnection(sc_library_experiment_id)
         sampleExpEdges = []
         if self.enableSampleMetadata:
-            sampleExpEdges = self.createSampleToExperimentConnection(libraryID, sampleID)
+            sampleExpEdges = self.createSampleToExperimentConnection(sc_library_experiment_id, sample_id_col)
         barcodeCellTypeEdges = []
         if self.enableCellTypeConnections:
-            barcodeCellTypeEdges = self.createBarcodeToCellTypeConnection(libraryID, celltypeID)
+            barcodeCellTypeEdges = self.createBarcodeToCellTypeConnection(sc_library_experiment_id, celltype_id_col)
         
         return list(itertools.chain([expToBarcodeEdges, barcodeToGeneEdges, barcodeCellTypeEdges, sampleExpEdges]))
 
