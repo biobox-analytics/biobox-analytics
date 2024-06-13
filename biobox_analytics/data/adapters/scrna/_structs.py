@@ -119,7 +119,7 @@ class Node(ConfiguredBaseModel):
 
 
 class Edge(ConfiguredBaseModel):
-    _from: Object = Field(...)
+    from_: Object = Field(...)
     to: Object = Field(...)
     label: str = Field(...)
 
@@ -229,19 +229,19 @@ class Protein(Object):
 
 
 class GenomeContainsInterval(Edge):
-    _from: Genome = Field(...)
+    from_: Genome = Field(...)
     to: GenomicInterval = Field(...)
     label: str = Field(...)
 
 
 class HasTranslation(Edge):
-    _from: Transcript = Field(...)
+    from_: Transcript = Field(...)
     to: Protein = Field(...)
     label: str = Field(...)
 
 
 class TranscribedTo(Edge):
-    _from: Gene = Field(...)
+    from_: Gene = Field(...)
     to: Transcript = Field(...)
     label: str = Field(...)
 
@@ -269,7 +269,7 @@ class NarrowPeak(Object):
     signalValue: Optional[float] = Field(None, description="""Measurement of overall (usually, average) enrichment for the region.""")
     pValue: Optional[float] = Field(None, description="""Measurement of statistical significance (-log10). Use -1 if no pValue is assigned.""")
     qValue: Optional[float] = Field(None, description="""Measurement of statistical significance using false discovery rate (-log10). Use -1 if no qValue is assigned.""")
-    peak: Optional[int] = Field(None, description="""Point-source called for this peak; 0-based offset _from chromStart. Use -1 if no point-source called.""")
+    peak: Optional[int] = Field(None, description="""Point-source called for this peak; 0-based offset from_ chromStart. Use -1 if no point-source called.""")
     uuid: Optional[str] = Field(None)
     displayName: str = Field(...)
     description: Optional[str] = Field(None)
@@ -285,19 +285,19 @@ class AssayTargetOn(Edge):
     modification: Optional[str] = Field(None)
     position: Optional[int] = Field(None)
     residue: Optional[str] = Field(None)
-    _from: ChipSeq = Field(...)
+    from_: ChipSeq = Field(...)
     to: Protein = Field(...)
     label: str = Field(...)
 
 
 class HasExperiment(Edge):
-    _from: Sample = Field(...)
+    from_: Sample = Field(...)
     to: Experiment = Field(...)
     label: str = Field(...)
 
 
 class HasPeak(Edge):
-    _from: CellBarcode = Field(...)
+    from_: CellBarcode = Field(...)
     to: NarrowPeak = Field(...)
     label: str = Field(...)
 
@@ -306,7 +306,7 @@ class PeakStartOn(Edge):
     """
     maps the starting position of the peak coverage interval
     """
-    _from: ChipSeq = Field(...)
+    from_: ChipSeq = Field(...)
     to: GenomicInterval = Field(...)
     label: str = Field(...)
 
@@ -315,7 +315,7 @@ class PeakEndOn(Edge):
     """
     maps the end position of the peak coverage interval
     """
-    _from: ChipSeq = Field(...)
+    from_: ChipSeq = Field(...)
     to: GenomicInterval = Field(...)
     label: str = Field(...)
 
@@ -353,19 +353,19 @@ class SingleCellATACseqExperiment(Experiment):
 
 
 class ContainsCell(Edge):
-    _from: SingleCellRNAseqExperiment = Field(...)
+    from_: SingleCellRNAseqExperiment = Field(...)
     to: CellBarcode = Field(...)
     label: str = Field(...)
 
 
 class Expresses(Edge):
-    _from: CellBarcode = Field(...)
+    from_: CellBarcode = Field(...)
     to: Gene = Field(...)
     label: str = Field(...)
 
 
 class HasCellType(Edge):
-    _from: CellBarcode = Field(...)
+    from_: CellBarcode = Field(...)
     to: CellType = Field(...)
     label: str = Field(...)
 
