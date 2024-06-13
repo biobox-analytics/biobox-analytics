@@ -119,12 +119,13 @@ class GenomeAdapter(Adapter):
             maxCoord = math.ceil(chrom['length']/1000)
             for i in range(maxCoord):
                 start = (i*1000) + 1
+                # In order to make the end more predictable, the uuid will use (i+1)*1000
                 if (i+1)==(maxCoord):
                     end = chrom['length']
                 else:
                     end = (i+1)*1000
                 genomicIntervals.append({
-                    "_id": f"{self.taxon}:{chrom['name']}:{start}-{end}",
+                    "_id": f"{self.taxon}:{chrom['name']}:{start}-{(i+1)*1000}",
                     "labels": ["GenomicInterval"],
                     "properties": {
                         "uuid": f"{self.taxon}:{chrom['name']}:{start}-{end}",
@@ -247,10 +248,11 @@ class GenomeAdapter(Adapter):
             maxCoord = math.ceil(chrom['length']/1000)
             for i in range(maxCoord):
                 start = (i*1000) + 1
-                if (i+1)==(maxCoord):
-                    end = chrom['length']
-                else:
-                    end = (i+1)*1000
+                # # In order to make uuid's more predictable for genomic intervals, the end is simply (i+1)*1000
+                # if (i+1)==(maxCoord):
+                #     end = chrom['length']
+                # else:
+                end = (i+1)*1000
                 edges.append({
                     "from": {
                         "uuid": self.genome.uuid,
@@ -273,10 +275,11 @@ class GenomeAdapter(Adapter):
                 start1 = (i*1000) + 1
                 end1 = (i+1)*1000
                 start2 = end1 + 1
-                if (i+2)==(maxCoord):
-                    end2 = chrom['length']
-                else:
-                    end2 = (i+2)*1000
+                # if (i+2)==(maxCoord):
+                #     end2 = chrom['length']
+                # else:
+                # # In order to make uuid's more predictable for genomic intervals, the end is simply (i+2)*1000
+                end2 = (i+2)*1000
                 # write the edges to a file
                 coordinateEdges.append({
                     "from": {
