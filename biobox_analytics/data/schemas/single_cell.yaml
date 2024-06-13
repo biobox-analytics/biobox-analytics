@@ -13,7 +13,6 @@ imports:
   - ./chipseq
 
 classes:
-
   CellBarcode:
     is_a: Object
 
@@ -27,14 +26,6 @@ classes:
     is_a: Experiment
 
   #  === EDGES ===
-  has cell type:
-    is_a: Edge
-    slot_usage:
-      _from:
-        range: CellBarcode
-      to:
-        range: CellType
-
   has experiment:
     is_a: Edge
     slot_usage:
@@ -58,6 +49,14 @@ classes:
         range: CellBarcode
       to:
         range: Gene
+
+  has cell type:
+    is_a: Edge
+    slot_usage:
+      _from:
+        range: CellBarcode
+      to:
+        range: CellType
 
   has peak:
     is_a: Edge
