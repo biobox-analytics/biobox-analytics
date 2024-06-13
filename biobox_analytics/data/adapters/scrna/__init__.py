@@ -7,7 +7,7 @@ import gzip
 import math
 from gtfparse import read_gtf
 import urllib.request
-from datetime import datetime
+import datetime
 import math
 import itertools
 import scanpy
@@ -22,16 +22,13 @@ class ScRNA(Adapter):
         
     ):
         super().__init__()
-        self.rna = scanpy.read_h5ad(h5adFile)
+        self.input_file = h5adFile
         self.node_filename = node_filename
         self.edge_filename = edge_filename
-        self.enableCellTypeConnections = True
-        self.enableTissueTypeConnections = True
-        self.enableSampleMetadata = True
         self._cellxgeneedges = []
     
     def pull_data(self):
-        return super().pull_data()
+        self.rna = scanpy.read_h5ad(self.input_file)
     
     def create_sample_nodes(self, sample_id_col, sample_cols_to_subset):
         samples = []
@@ -63,15 +60,37 @@ class ScRNA(Adapter):
             })
         return barcodes
 
-    def iterate_nodes(self, sc_library_experiment_id="library_uuid", sample_id_col="sample_uuid", sc_experiment_cols_to_subset=["library_uuid"], sample_metadata_cols_to_subset=["sample_uuid"]):
-        barcodes = self.create_cell_nodes(sc_library_experiment_id)
-        singleCellExperiments = self.create_sc_experiment_library_nodes(sc_library_experiment_id, sc_experiment_cols_to_subset)
-        samples = []
-        if (self.enableSampleMetadata):
-            samples = self.create_sample_nodes(sample_id_col, sample_metadata_cols_to_subset)
-        return list(itertools.chain([barcodes, singleCellExperiments, samples]))
+    def iterate_nodes(self,  write_to_disk=True, sc_library_experiment_id="library_uuid", sample_id_col="sample_uuid", sc_experiment_cols_to_subset=["library_uuid"], sample_metadata_cols_to_subset=["sample_uuid"]):
+        if (write_to_disk):
+            print(f"Running function in write mode. Writing to file {self.node_filename}. To return nodes, set write_to_disk=False in function call")
+            nodes = []
+            print(f"Create cell nodes")
+            nodes = self.create_cell_nodes(sc_library_experiment_id)
+            print(f"Writing {len(nodes)} cell nodes to file")
+            self.append_to_file(nodes, filepath=self.node_filename)
+            nodes = []
+            print(f"Create experiment nodes")
+            nodes = self.create_sc_experiment_library_nodes(sc_library_experiment_id, sc_experiment_cols_to_subset)
+            print(f"Writing {len(nodes)} experiment nodes to file")
+            self.append_to_file(nodes, filepath=self.node_filename)
+            if (sample_id_col):
+                nodes = []
+                print(f"Create sample nodes")
+                nodes = self.create_sample_nodes(sample_id_col, sample_metadata_cols_to_subset)
+                print(f"Writing {len(nodes)} sample nodes to file")
+                self.append_to_file(nodes, filepath=self.node_filename)
+                nodes = []
+            print(f"All nodes written to file: {self.node_filename}")
+        else:
+            print("Running function in non-write mode. Returning nodes. To write to file, set write_to_disk=True in function call")
+            barcodes = self.create_cell_nodes(sc_library_experiment_id)
+            singleCellExperiments = self.create_sc_experiment_library_nodes(sc_library_experiment_id, sc_experiment_cols_to_subset)
+            samples = []
+            if (sample_id_col):
+                samples = self.create_sample_nodes(sample_id_col, sample_metadata_cols_to_subset)
+            return list(itertools.chain(*[barcodes, singleCellExperiments, samples]))
     
-    def createSampleToExperimentConnection(self, sc_library_experiment_id, sample_id_col):
+    def create_sample_to_experiment_connection(self, sc_library_experiment_id, sample_id_col):
         edges = []
         for index, row in self.rna.obs.drop_duplicates(subset=sc_library_experiment_id).iterrows():
             edges.append({
@@ -85,7 +104,7 @@ class ScRNA(Adapter):
             })
         return edges
     
-    def createExperimentToBarcodeConnection(self, sc_library_experiment_id):
+    def create_experiment_to_barcode_connection(self, sc_library_experiment_id):
         edges = []
         for index, row in self.rna.obs.iterrows():
             edges.append({
@@ -99,7 +118,7 @@ class ScRNA(Adapter):
             })
         return edges
     
-    def createBarcodeToCellTypeConnection(self, sc_library_experiment_id, celltype_id_col):
+    def create_barcode_to_celltype_connection(self, sc_library_experiment_id, celltype_id_col):
         edges = []
         for index, row in self.rna.obs.iterrows():
             edges.append({
@@ -113,7 +132,7 @@ class ScRNA(Adapter):
             })
         return edges
 
-    def _process_barcodes_genes(row, barcode):
+    def _process_barcodes_genes(self, row, barcode):
         return {
             "from": {
                 "uuid": barcode
@@ -123,19 +142,19 @@ class ScRNA(Adapter):
             },
             "label": "expresses",
             "properties": {
-                "normValue": row['expression']
+                "normValue": row[barcode].astype(float)
             }
         }
     
-    def _process_barcode(self, column, library):
-        barcode = column.name + ":" + library
+    def _process_barcode(self, column):
+        barcode = column.name
         cell = pd.DataFrame(column)
         filtered_cell = cell[cell[column.name] > 0]
         # cell2 = cell.set_axis(['expression'], axis=1)
         a = filtered_cell.apply(lambda row: self._process_barcodes_genes(row, barcode), axis=1)
         self._cellxgeneedges.extend(a.tolist())
     
-    def createBarcodeToGeneConnection(self, sc_library_experiment_id):
+    def create_barcode_to_gene_connection(self, sc_library_experiment_id):
         numcells = self.rna.X.shape[0]
         print(f"Number of cells to process: {numcells}")
         print(f"Starting Cell x Gene edge processing now: {datetime.datetime.now()}")
@@ -155,17 +174,41 @@ class ScRNA(Adapter):
         print(f"Cell x Gene edges written to file: {self.edge_filename}")
         return []
 
-    def iterate_edges(self, sc_library_experiment_id="library_uuid", sample_id_col="sample_uuid", celltype_id_col="cell_type"):
-        expToBarcodeEdges = self.createExperimentToBarcodeConnection(sc_library_experiment_id)
-        barcodeToGeneEdges = self.createBarcodeToGeneConnection(sc_library_experiment_id)
-        sampleExpEdges = []
-        if self.enableSampleMetadata:
-            sampleExpEdges = self.createSampleToExperimentConnection(sc_library_experiment_id, sample_id_col)
-        barcodeCellTypeEdges = []
-        if self.enableCellTypeConnections:
-            barcodeCellTypeEdges = self.createBarcodeToCellTypeConnection(sc_library_experiment_id, celltype_id_col)
-        
-        return list(itertools.chain([expToBarcodeEdges, barcodeToGeneEdges, barcodeCellTypeEdges, sampleExpEdges]))
+    def iterate_edges(self, write_to_disk=True, sc_library_experiment_id="library_uuid", sample_id_col=None, celltype_id_col=None, tissuetype_id_col=None):
+        if (write_to_disk):
+            print(f"Running function in write mode. Writing to file {self.edge_filename}. To return edges, set write_to_disk=False in function call")
+            edges = []
+            print(f"Calculating experiment-cell edges")
+            edges = self.create_experiment_to_barcode_connection(sc_library_experiment_id)
+            print(f"Writing {len(edges)} experiment-cell edges to file")
+            self.append_to_file(edges, filepath=self.edge_filename)
+            if sample_id_col != None:
+                print(f"Calculating sample-experiment edges")
+                edges = self.create_sample_to_experiment_connection(sc_library_experiment_id, sample_id_col)
+                print(f"Writing {len(edges)} sample-experiment edges to file")
+                self.append_to_file(edges, filepath=self.edge_filename)
+                edges = []
+            if celltype_id_col != None:
+                print(f"Calculating cell-celltype edges")
+                edges = self.create_barcode_to_celltype_connection(sc_library_experiment_id, celltype_id_col)
+                print(f"Writing {len(edges)} cell-celltype edges to file")
+                self.append_to_file(edges, filepath=self.edge_filename)
+                edges = []
+            print(f"Calculating cell-gene edges")
+            self.create_barcode_to_gene_connection(sc_library_experiment_id)
+            print(f"All edges written to file: {self.edge_filename}")
+        else:
+            print("Running function in non-write mode. Returning edges. To write to file, set write_to_disk=True in function call")
+            exp_to_barcode_edges = self.create_experiment_to_barcode_connection(sc_library_experiment_id)
+            print("Skipping cell-gene edges as the matrix is too large")
+            # barcode_to_gene_edges = self.create_barcode_to_gene_connection(sc_library_experiment_id)
+            sample_exp_edges = []
+            if sample_id_col != None:
+                sample_exp_edges = self.create_sample_to_experiment_connection(sc_library_experiment_id, sample_id_col)
+            barcode_celltype_edges = []
+            if self.enable_celltype_connections:
+                barcode_celltype_edges = self.create_barcode_to_celltype_connection(sc_library_experiment_id, celltype_id_col)
+            return list(itertools.chain(*[exp_to_barcode_edges, barcode_celltype_edges, sample_exp_edges]))
 
     def process_item(self, item):
         """Processes a single item (node or edge)."""
