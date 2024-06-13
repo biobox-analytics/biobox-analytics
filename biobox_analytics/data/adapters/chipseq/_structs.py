@@ -8,6 +8,23 @@ from enum import Enum
 import re
 import sys
 from pydantic.version import VERSION  as PYDANTIC_VERSION 
+from typing import (
+    Any,
+    List,
+    Literal,
+    Dict,
+    Optional,
+    Union,
+    Generic,
+    Iterable,
+    TypeVar,
+    get_args
+)
+if sys.version_info.minor > 8:
+    from typing import Annotated 
+else:
+    from typing_extensions import Annotated 
+
 if int(PYDANTIC_VERSION[0])>=2:
     from pydantic import (
         BaseModel,
@@ -22,31 +39,24 @@ else:
         validator
     )
 
-from typing import (
-    Any,
-    List,
-    Literal,
-    Dict,
-    Optional,
-    Union,
-    Generic,
-    TypeVar,
-    _GenericAlias
+from pydantic import GetCoreSchemaHandler 
+from pydantic_core import (
+    CoreSchema,
+    core_schema
 )
 metamodel_version = "None"
 version = "None"
 
 
-class WeakRefShimBaseModel(BaseModel):
-    __slots__ = '__weakref__'
-
-class ConfiguredBaseModel(WeakRefShimBaseModel,
-                validate_assignment = True,
-                validate_all = True,
-                underscore_attrs_are_private = True,
-                extra = "forbid",
-                arbitrary_types_allowed = True,
-                use_enum_values = True):
+class ConfiguredBaseModel(BaseModel):
+    model_config = ConfigDict(
+        validate_assignment = True,
+        validate_default = True,
+        extra = "forbid",
+        arbitrary_types_allowed = True,
+        use_enum_values = True,
+        strict = False,
+    )
     pass
 
 
@@ -56,68 +66,44 @@ class ModificationTypes(str, Enum):
 
 _T = TypeVar("_T")
 
-class AnyShapeArray(Generic[_T]):
-    type_: Type[Any] = Any
+_RecursiveListType = Iterable[Union[_T, Iterable["_RecursiveListType"]]]
 
-    def __class_getitem__(cls, item):
-        alias = type(f"AnyShape_{str(item.__name__)}", (AnyShapeArray,), {"type_": item})
-        alias.type_ = item
-        return alias
-
+class AnyShapeArrayType(Generic[_T]):
     @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+    def __get_pydantic_core_schema__(cls, source_type: Any, handler: GetCoreSchemaHandler) -> CoreSchema:
+        # double-nested parameterized types here
+        # source_type: List[Union[T,List[...]]]
+        item_type = Any if get_args(get_args(source_type)[0])[0] is _T else get_args(get_args(source_type)[0])[0]
 
-    @classmethod
-    def __modify_schema__(cls, field_schema):
-        try:
-            item_type = field_schema["allOf"][0]["type"]
-            type_schema = {"type": item_type}
-            del field_schema["allOf"]
-        except KeyError as e:
-            if "allOf" in str(e):
-                item_type = "Any"
-                type_schema = {}
-            else:
-                raise e
+        item_schema = handler.generate_schema(item_type)
+        if item_schema.get("type", "any") != "any":
+            item_schema["strict"] = True
 
-        array_id = f"#any-shape-array-{item_type}"
-        field_schema["anyOf"] = [
-            type_schema,
-            {"type": "array", "items": {"$ref": array_id}},
-        ]
-        field_schema["$id"] = array_id
+        if item_type is Any:
+            # Before python 3.11, `Any` type was a special object without a __name__
+            item_name = "Any"
+        else:
+            item_name = item_type.__name__
 
-    @classmethod
-    def validate(cls, v: Union[List[_T], list]):
-        if str(type(v)) == "<class 'numpy.ndarray'>":
-            v = v.tolist()
+        array_ref = f"any-shape-array-{item_name}"
 
-        if not isinstance(v, list):
-            raise TypeError(f"Must be a list of lists! got {v}")
+        schema = core_schema.definitions_schema(
+            core_schema.list_schema(core_schema.definition_reference_schema(array_ref)),
+            [
+                core_schema.union_schema(
+                    [
+                        core_schema.list_schema(core_schema.definition_reference_schema(array_ref)),
+                        item_schema,
+                    ],
+                    ref=array_ref,
+                )
+            ],
+        )
 
-        def _validate(_v: Union[List[_T], list]):
-            for item in _v:
-                if isinstance(item, list):
-                    _validate(item)
-                else:
-                    try:
-                        anytype = cls.type_.__name__ in ("AnyType", "Any")
-                    except AttributeError:
-                        # in python 3.8 and 3.9, `typing.Any` has no __name__
-                        anytype = str(cls.type_).split(".")[-1] in ("AnyType", "Any")
+        return schema
 
-                    if not anytype and not isinstance(item, cls.type_):
-                        raise TypeError(
-                            (
-                                f"List items must be list of lists, or the type used in "
-                                f"the subscript ({cls.type_}. Got item {item} and outer value {v}"
-                            )
-                        )
-            return _v
 
-        return _validate(v)
-
+AnyShapeArray = Annotated[_RecursiveListType, AnyShapeArrayType]
 
 class Object(ConfiguredBaseModel):
     uuid: Optional[str] = Field(None)
@@ -128,12 +114,12 @@ class Object(ConfiguredBaseModel):
 
 
 class Node(ConfiguredBaseModel):
-    _id: str = Field(...)
+    id: str = Field(...)
     labels: Optional[AnyShapeArray[str]] = Field(None)
 
 
 class Edge(ConfiguredBaseModel):
-    _from: Object = Field(...)
+    from_: Object = Field(...)
     to: Object = Field(...)
     label: str = Field(...)
 
@@ -235,19 +221,19 @@ class Protein(Object):
 
 
 class GenomeContainsInterval(Edge):
-    _from: Genome = Field(...)
+    from_: Genome = Field(...)
     to: GenomicInterval = Field(...)
     label: str = Field(...)
 
 
 class HasTranslation(Edge):
-    _from: Transcript = Field(...)
+    from_: Transcript = Field(...)
     to: Protein = Field(...)
     label: str = Field(...)
 
 
 class TranscribedTo(Edge):
-    _from: Gene = Field(...)
+    from_: Gene = Field(...)
     to: Transcript = Field(...)
     label: str = Field(...)
 
@@ -275,7 +261,7 @@ class NarrowPeak(Object):
     signalValue: Optional[float] = Field(None, description="""Measurement of overall (usually, average) enrichment for the region.""")
     pValue: Optional[float] = Field(None, description="""Measurement of statistical significance (-log10). Use -1 if no pValue is assigned.""")
     qValue: Optional[float] = Field(None, description="""Measurement of statistical significance using false discovery rate (-log10). Use -1 if no qValue is assigned.""")
-    peak: Optional[int] = Field(None, description="""Point-source called for this peak; 0-based offset _from chromStart. Use -1 if no point-source called.""")
+    peak: Optional[int] = Field(None, description="""Point-source called for this peak; 0-based offset from_ chromStart. Use -1 if no point-source called.""")
     uuid: Optional[str] = Field(None)
     displayName: str = Field(...)
     description: Optional[str] = Field(None)
@@ -291,7 +277,7 @@ class AssayTargetOn(Edge):
     modification: Optional[str] = Field(None)
     position: Optional[int] = Field(None)
     residue: Optional[str] = Field(None)
-    _from: ChipSeq = Field(...)
+    from_: ChipSeq = Field(...)
     to: Protein = Field(...)
     label: str = Field(...)
 
@@ -300,7 +286,7 @@ class HasExperiment(Edge):
     """
     Sample has experiment
     """
-    _from: Sample = Field(...)
+    from_: Sample = Field(...)
     to: ChipSeq = Field(...)
     label: str = Field(...)
 
@@ -309,7 +295,7 @@ class HasPeak(Edge):
     """
     seq experiment that generated bed peaks
     """
-    _from: ChipSeq = Field(...)
+    from_: ChipSeq = Field(...)
     to: NarrowPeak = Field(...)
     label: str = Field(...)
 
@@ -318,7 +304,7 @@ class PeakStartOn(Edge):
     """
     maps the starting position of the peak coverage interval
     """
-    _from: ChipSeq = Field(...)
+    from_: ChipSeq = Field(...)
     to: GenomicInterval = Field(...)
     label: str = Field(...)
 
@@ -327,33 +313,33 @@ class PeakEndOn(Edge):
     """
     maps the end position of the peak coverage interval
     """
-    _from: ChipSeq = Field(...)
+    from_: ChipSeq = Field(...)
     to: GenomicInterval = Field(...)
     label: str = Field(...)
 
 
-# Update forward refs
-# see https://pydantic-docs.helpmanual.io/usage/postponed_annotations/
-Object.update_forward_refs()
-Node.update_forward_refs()
-Edge.update_forward_refs()
-Sample.update_forward_refs()
-Donor.update_forward_refs()
-Experiment.update_forward_refs()
-EpigeneticExperiment.update_forward_refs()
-Genome.update_forward_refs()
-GenomicInterval.update_forward_refs()
-Gene.update_forward_refs()
-Transcript.update_forward_refs()
-Protein.update_forward_refs()
-GenomeContainsInterval.update_forward_refs()
-HasTranslation.update_forward_refs()
-TranscribedTo.update_forward_refs()
-ChipSeq.update_forward_refs()
-NarrowPeak.update_forward_refs()
-AssayTargetOn.update_forward_refs()
-HasExperiment.update_forward_refs()
-HasPeak.update_forward_refs()
-PeakStartOn.update_forward_refs()
-PeakEndOn.update_forward_refs()
+# Model rebuild
+# see https://pydantic-docs.helpmanual.io/usage/models/#rebuilding-a-model
+Object.model_rebuild()
+Node.model_rebuild()
+Edge.model_rebuild()
+Sample.model_rebuild()
+Donor.model_rebuild()
+Experiment.model_rebuild()
+EpigeneticExperiment.model_rebuild()
+Genome.model_rebuild()
+GenomicInterval.model_rebuild()
+Gene.model_rebuild()
+Transcript.model_rebuild()
+Protein.model_rebuild()
+GenomeContainsInterval.model_rebuild()
+HasTranslation.model_rebuild()
+TranscribedTo.model_rebuild()
+ChipSeq.model_rebuild()
+NarrowPeak.model_rebuild()
+AssayTargetOn.model_rebuild()
+HasExperiment.model_rebuild()
+HasPeak.model_rebuild()
+PeakStartOn.model_rebuild()
+PeakEndOn.model_rebuild()
 
