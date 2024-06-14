@@ -1,5 +1,5 @@
 from biobox_analytics.data.adapters._base import Adapter
-# import biobox_analytics.data.adapters.scrna._structs as structs
+# import biobox_analytics.data.adapters.scatac._structs as structs
 import json
 import os
 import gzip
@@ -10,12 +10,13 @@ import itertools
 import scanpy
 import pandas as pd
 
-class ScRNA(Adapter):
+class ScATAC(Adapter):
     def __init__(
         self,
         h5adFile,
         node_filename='node.jsonl.gz',
         edge_filename='edge.jsonl.gz',
+        
     ):
         super().__init__()
         self.input_file = h5adFile
@@ -23,13 +24,13 @@ class ScRNA(Adapter):
         self.node_filename = node_filename
         self.edge_filename = edge_filename
         self.current_date_time = str(datetime.datetime.now())
-        self.displayName = f"SingleCellRNASeq Datapack - {self.current_date_time}"
-        self.description = "SingleCellRNASeq Datapack created through Python SDK"
-        self.key = f"scrna:{self.current_date_time}"
+        self.displayName = f"SingleCellATACSeq Datapack - {self.current_date_time}"
+        self.description = "SingleCellATACSeq Datapack created through Python SDK"
+        self.key = f"scatac:{self.current_date_time}"
         self._cellxgeneedges = []
     
     def pull_data(self):
-        self.rna = scanpy.read_h5ad(self.input_file)
+        self.atac = scanpy.read_h5ad(self.input_file)
 
     def set_metadata(self, displayName, description, key):
         self.displayName = displayName
@@ -38,7 +39,7 @@ class ScRNA(Adapter):
     
     def create_sample_nodes(self, sample_id_col, sample_cols_to_subset):
         samples = []
-        for index, row in self.rna.obs[sample_cols_to_subset].drop_duplicates(subset=sample_id_col).iterrows():
+        for index, row in self.atac.obs[sample_cols_to_subset].drop_duplicates(subset=sample_id_col).iterrows():
             props = row.to_dict()
             props['displayName'] = row[sample_id_col]
             samples.append({
@@ -50,19 +51,19 @@ class ScRNA(Adapter):
     
     def create_sc_experiment_library_nodes(self, sc_library_experiment_id, library_experiment_cols_to_subset):
         experiments = []
-        for index, row in self.rna.obs[library_experiment_cols_to_subset].drop_duplicates(subset=sc_library_experiment_id).iterrows():
+        for index, row in self.atac.obs[library_experiment_cols_to_subset].drop_duplicates(subset=sc_library_experiment_id).iterrows():
             props = row.to_dict()
             props['displayName'] = row[sc_library_experiment_id]
             experiments.append({
                 "_id": row[sc_library_experiment_id],
-                "labels": ["Experiment","SingleCellExperiment","SingleCellRNAseqExperiment"],
+                "labels": ["Experiment","SingleCellExperiment","SingleCellATACseqExperiment"],
                 "properties": props
             })
         return experiments
     
     def create_cell_nodes(self, sc_library_experiment_id):
         barcodes = []
-        for index, row in self.rna.obs.iterrows():
+        for index, row in self.atac.obs.iterrows():
             barcodes.append({
                 "_id": f"{row[sc_library_experiment_id]}:{index}",
                 "labels": ["CellBarcode"],
@@ -104,7 +105,7 @@ class ScRNA(Adapter):
     
     def create_sample_to_experiment_connection(self, sc_library_experiment_id, sample_id_col):
         edges = []
-        for index, row in self.rna.obs.drop_duplicates(subset=sc_library_experiment_id).iterrows():
+        for index, row in self.atac.obs.drop_duplicates(subset=sc_library_experiment_id).iterrows():
             edges.append({
                 "from": {
                     "uuid": row[sample_id_col]
@@ -118,7 +119,7 @@ class ScRNA(Adapter):
     
     def create_experiment_to_barcode_connection(self, sc_library_experiment_id):
         edges = []
-        for index, row in self.rna.obs.iterrows():
+        for index, row in self.atac.obs.iterrows():
             edges.append({
                 "from": {
                     "uuid": row[sc_library_experiment_id]
@@ -132,7 +133,7 @@ class ScRNA(Adapter):
     
     def create_barcode_to_celltype_connection(self, sc_library_experiment_id, celltype_id_col):
         edges = []
-        for index, row in self.rna.obs.iterrows():
+        for index, row in self.atac.obs.iterrows():
             edges.append({
                 "from": {
                     "uuid": f"{row[sc_library_experiment_id]}:{index}"
@@ -167,19 +168,19 @@ class ScRNA(Adapter):
         self._cellxgeneedges.extend(a.tolist())
     
     def create_barcode_to_gene_connection(self, sc_library_experiment_id):
-        numcells = self.rna.X.shape[0]
+        numcells = self.atac.X.shape[0]
         print(f"Number of cells to process: {numcells}")
         print(f"Starting Cell x Gene edge processing now: {datetime.datetime.now()}")
-        for i in range(math.ceil(self.rna.X.shape[0]/1000)):
+        for i in range(math.ceil(self.atac.X.shape[0]/1000)):
             low = i*1000
             high = (i+1)*1000
             if (high > numcells):
                 high = numcells
             print(f"Processing batch index {low}:{high}")
-            library = self.rna.obs[sc_library_experiment_id][low:high]
-            cell = self.rna.obs.index[low:high]
+            library = self.atac.obs[sc_library_experiment_id][low:high]
+            cell = self.atac.obs.index[low:high]
             cell_uniq = [f"{libi}:{celli}" for libi, celli in zip(library.tolist(), cell.tolist())]
-            rowPandas = pd.DataFrame(self.rna.X[low:high].toarray().T, index=self.rna.var.index, columns=cell_uniq)
+            rowPandas = pd.DataFrame(self.atac.X[low:high].toarray().T, index=self.atac.var.index, columns=cell_uniq)
             rowPandas.apply(self._process_barcode, axis=0)
             self.append_to_file(self._cellxgeneedges, filepath=self.edge_filename)
             self._cellxgeneedges = []
@@ -255,9 +256,9 @@ class ScRNA(Adapter):
                     "definition": "Single Cell Experiment of the sample tissue",
                     "sco": "Experiment",
                 },
-                "SingleCellRNAseqExperiment": {
-                    "label": "SingleCellRNAseqExperiment",
-                    "dbLabel": "SingleCellRNAseqExperiment",
+                "SingleCellATACseqExperiment": {
+                    "label": "SingleCellATACseqExperiment",
+                    "dbLabel": "SingleCellATACseqExperiment",
                     "definition": "Single Cell RNAseq Experiment of the sample tissue",
                     "sco": "SingleCellExperiment",
                 },
@@ -277,7 +278,7 @@ class ScRNA(Adapter):
                     "from": "SingleCellExperiment",
                     "to": "CellBarcode"
                 },
-                "expresses": {
+                "has gene peak": {
                     "from": "CellBarcode",
                     "to": "Gene"
                 },

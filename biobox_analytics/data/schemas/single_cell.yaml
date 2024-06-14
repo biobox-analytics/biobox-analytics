@@ -16,14 +16,17 @@ classes:
   CellBarcode:
     is_a: Object
 
-  SingleCellRNAseqExperiment:
+  SingleCellExperiment:
     is_a: Experiment
+
+  SingleCellRNAseqExperiment:
+    is_a: SingleCellExperiment
 
   SingleNucleiRNAseqExperiment:
     is_a: SingleCellRNAseqExperiment
 
   SingleCellATACseqExperiment:
-    is_a: Experiment
+    is_a: SingleCellExperiment
 
   #  === EDGES ===
   has experiment:
@@ -38,7 +41,7 @@ classes:
     is_a: Edge
     slot_usage:
       _from:
-        range: SingleCellRNAseqExperiment
+        range: SingleCellExperiment
       to:
         range: CellBarcode
 
@@ -57,6 +60,14 @@ classes:
         range: CellBarcode
       to:
         range: CellType
+
+  has gene peak:
+    is_a: Edge
+    slot_usage:
+      _from:
+        range: CellBarcode
+      to:
+        range: Gene
 
   has peak:
     is_a: Edge
