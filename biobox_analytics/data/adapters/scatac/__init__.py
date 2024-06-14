@@ -176,7 +176,7 @@ class ScATAC(Adapter):
             high = (i+1)*1000
             if (high > numcells):
                 high = numcells
-            print(f"Processing batch index {low}:{high}")
+            print(f"Processing batch index {low}:{high} at time {datetime.datetime.now()}")
             library = self.atac.obs[sc_library_experiment_id][low:high]
             cell = self.atac.obs.index[low:high]
             cell_uniq = [f"{libi}:{celli}" for libi, celli in zip(library.tolist(), cell.tolist())]
@@ -184,7 +184,7 @@ class ScATAC(Adapter):
             rowPandas.apply(self._process_barcode, axis=0)
             self.append_to_file(self._cellxgeneedges, filepath=self.edge_filename)
             self._cellxgeneedges = []
-        print(f"Cell x Gene edges written to file: {self.edge_filename}")
+        print(f"Cell x Gene edges written to file: {self.edge_filename} at time {datetime.datetime.now()}")
         return []
 
     def iterate_edges(self, write_to_disk=True, sc_library_experiment_id="library_uuid", sample_id_col=None, celltype_id_col=None, tissuetype_id_col=None):
