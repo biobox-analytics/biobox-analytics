@@ -23,30 +23,44 @@ class ScRNA(Adapter):
     ):
         super().__init__()
         self.input_file = h5adFile
+        self.pull_data()
         self.node_filename = node_filename
         self.edge_filename = edge_filename
+        self.current_date_time = str(datetime.datetime.now())
+        self.displayName = f"SingleCellRNASeq Datapack - {self.current_date_time}"
+        self.description = "SingleCellRNASeq Datapack created through Python SDK"
+        self.key = f"scrna:{self.current_date_time}"
         self._cellxgeneedges = []
     
     def pull_data(self):
         self.rna = scanpy.read_h5ad(self.input_file)
+
+    def set_metadata(self, displayName, description, key):
+        self.displayName = displayName
+        self.description = description
+        self.key = key
     
     def create_sample_nodes(self, sample_id_col, sample_cols_to_subset):
         samples = []
         for index, row in self.rna.obs[sample_cols_to_subset].drop_duplicates(subset=sample_id_col).iterrows():
+            props = row.to_dict()
+            props['displayName'] = row[sample_id_col]
             samples.append({
                 "_id": row[sample_id_col],
                 "labels": ["Sample"],
-                "properties": row.to_dict()
+                "properties": props
             })
         return samples
     
     def create_sc_experiment_library_nodes(self, sc_library_experiment_id, library_experiment_cols_to_subset):
         experiments = []
         for index, row in self.rna.obs[library_experiment_cols_to_subset].drop_duplicates(subset=sc_library_experiment_id).iterrows():
+            props = row.to_dict()
+            props['displayName'] = row[sc_library_experiment_id]
             experiments.append({
                 "_id": row[sc_library_experiment_id],
                 "labels": ["SingleCellRNAseqExperiment"],
-                "properties": row.to_dict()
+                "properties": props
             })
         return experiments
     
@@ -56,7 +70,9 @@ class ScRNA(Adapter):
             barcodes.append({
                 "_id": f"{row[sc_library_experiment_id]}:{index}",
                 "labels": ["CellBarcode"],
-                "properties": {}
+                "properties": {
+                    "displayName": f"{row[sc_library_experiment_id]}:{index}"
+                }
             })
         return barcodes
 
@@ -222,7 +238,55 @@ class ScRNA(Adapter):
         pass
     
     def list_schema(self):
-        return None
+        metadata = {
+            "_meta": {
+                "version": "0.0.1",
+                "date_updated": self.current_date_time,
+            },
+            "name": self.displayName,
+            "key": self.key, 
+            "description": self.description,
+            "dependencies": ["Ensembl"],
+            "concepts": {
+                "SingleCellRNAseqExperiment": {
+                    "label": "SingleCellRNAseqExperiment",
+                    "dbLabel": "SingleCellRNAseqExperiment",
+                    "definition": "Single Cell RNAseq Experiment of the sample tissue",
+                },
+                "Sample": {
+                    "label": "Sample",
+                    "dbLabel": "Sample",
+                    "definition": "Sample organism from which tissue was taken to be analyzed",
+                },
+                "CellBarcode": {
+                    "label": "Cell Barcode",
+                    "dbLabel": "CellBarcode",
+                    "definition": "Individual cell from scRNA experiment, identified by barcode",
+                }
+            },
+            "relationships": {
+                "contains cell": {
+                    "from": "SingleCellRNAseqExperiment",
+                    "to": "CellBarcode"
+                },
+                "expresses": {
+                    "from": "CellBarcode",
+                    "to": "Gene"
+                },
+                "has experiment": {
+                    "from": "Sample",
+                    "to": "SingleCellRNAseqExperiment"
+                },
+                "has cell type": {
+                    "from": "CellBarcode",
+                    "to": "CellType"
+                },
+            }
+        }
+        print(json.dumps(metadata))
+
+        return metadata
+        
     
     def append_to_file(self, objs, directory="", filepath="obj.jsonl.gz"):
         with gzip.open(os.path.join(directory, filepath), "at") as f:
