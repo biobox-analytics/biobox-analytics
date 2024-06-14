@@ -153,9 +153,9 @@ class ScATAC(Adapter):
             "to": {
                 "uuid": row.name
             },
-            "label": "expresses",
+            "label": "has gene peak",
             "properties": {
-                "normValue": row[barcode].astype(float)
+                "peakValue": row[barcode].astype(float)
             }
         }
     
