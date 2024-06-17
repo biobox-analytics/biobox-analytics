@@ -199,21 +199,3 @@ class ChipSeqAdapter(Adapter):
                     else:
                         json.dump(object, o)
                         o.write("\n")
-
-
-if __name__ == "__main__":
-    chipseq = ChipSeqAdapter(
-        name="My ChIPSeq",
-        protein_id="protein_id",
-        modification_type="mod_type",
-        sample_id="sample_id",
-        bed_filepath="ENCFF598DYJ.bed"
-    )
-    chipseq.write()
-    # chipseq.build()
-    # # for node in chipseq.get_nodes():
-    # for node in chipseq.nodes:
-    #     print(node)
-
-    # for edge in chipseq.edges:
-    #     print(edge)
