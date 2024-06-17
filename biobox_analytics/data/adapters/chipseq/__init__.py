@@ -16,6 +16,8 @@ class ChipSeqAdapter(Adapter):
         sample_id: str,
         bed_filepath: str,
         taxon_id: str = "9601",
+        objects_file: str = "objs.jsonl.gz",
+        edges_file: str = "edges.jsonl.gz",
     ):
         super().__init__()
         self.name = name
@@ -24,6 +26,8 @@ class ChipSeqAdapter(Adapter):
         self.sample_id = sample_id
         self.bed_filepath = bed_filepath
         self.taxon_id = taxon_id
+        self.objects_file = objects_file
+        self.edges_file = edges_file
         
         self.chipseq_id = generate()
 
@@ -175,8 +179,8 @@ class ChipSeqAdapter(Adapter):
                 #     self.nodes.append(object)
 
     def write(self):
-        obs_file = os.path.join("", "objs.jsonl.gz")
-        edges_file = os.path.join("", "edges.jsonl.gz")
+        obs_file = os.path.join("", self.objects_file)
+        edges_file = os.path.join("", self.edges_file)
         with gzip.open(obs_file, "at") as o, gzip.open(edges_file, "at") as e:
             self.pull_data()
             iterator = self.iterate_nodes()
