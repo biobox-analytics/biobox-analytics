@@ -71,7 +71,7 @@ class ScRNA(Adapter):
             })
         return barcodes
 
-    def iterate_nodes(self,  write_to_disk=True, sc_library_experiment_id="library_uuid", sample_id_col="sample_uuid", sc_experiment_cols_to_subset=["library_uuid"], sample_metadata_cols_to_subset=["sample_uuid"]):
+    def iterate_nodes(self, write_to_disk=True, sc_library_experiment_id="library_uuid", sample_id_col="sample_uuid", sc_experiment_cols_to_subset=["library_uuid"], sample_metadata_cols_to_subset=["sample_uuid"]):
         if (write_to_disk):
             print(f"Running function in write mode. Writing to file {self.node_filename}. To return nodes, set write_to_disk=False in function call")
             nodes = []
@@ -291,7 +291,6 @@ class ScRNA(Adapter):
             }
         }
         return metadata
-        
     
     def append_to_file(self, objs, directory="", filepath="obj.jsonl.gz"):
         with gzip.open(os.path.join(directory, filepath), "at") as f:
@@ -299,16 +298,16 @@ class ScRNA(Adapter):
                 json.dump(x, f)
                 f.write("\n")
 
-    def write_serialized_data_to_file(self, directory=""):
-        node_filepath = os.path.join(directory, self.node_filename)
-        edge_filepath = os.path.join(directory, self.edge_filename)
+    # def write_serialized_data_to_file(self, directory=""):
+    #     node_filepath = os.path.join(directory, self.node_filename)
+    #     edge_filepath = os.path.join(directory, self.edge_filename)
 
-        with gzip.open(node_filepath, "at") as f:
-            for x in self.nodes:
-                json.dump(x, f)
-                f.write("\n")
+    #     with gzip.open(node_filepath, "at") as f:
+    #         for x in self.nodes:
+    #             json.dump(x, f)
+    #             f.write("\n")
 
-        with gzip.open(edge_filepath, "at") as f:
-            for x in self.edges:
-                json.dump(x, f)
-                f.write("\n")
+    #     with gzip.open(edge_filepath, "at") as f:
+    #         for x in self.edges:
+    #             json.dump(x, f)
+    #             f.write("\n")

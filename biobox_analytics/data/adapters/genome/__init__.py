@@ -7,7 +7,7 @@ import gzip
 import math
 from gtfparse import read_gtf
 import urllib.request
-from datetime import datetime
+import datetime
 import itertools
 
 class GenomeAdapter(Adapter):
@@ -21,9 +21,13 @@ class GenomeAdapter(Adapter):
         self.edges = []
         self.node_filename = node_filename
         self.edge_filename = edge_filename
+        self.current_date_time = str(datetime.datetime.now())
         self._gtfloaded = False
         self.taxon = self.__get_taxonid()
         self.__get_ensembl_assembly_info()
+        self.displayName = f"Genome Datapack - {self.species} {self.taxon} ({self.current_date_time})"
+        self.description = "Genome Datapack created through Python SDK"
+        self.key = f"genome:{self.taxon}:{self.current_date_time}"
         # dateCreated = str(datetime.now().isoformat())
         self.genome = structs.Genome(
             uuid=f"genome_{self.assembly}",
@@ -33,38 +37,6 @@ class GenomeAdapter(Adapter):
             # dateCreated=dateCreated,
             assembly=self.assembly
         )
-    
-    # @property
-    # def chromosome_regions(self):
-    #     return self.chromosome_regions
-    
-    # @property
-    # def taxon(self):
-    #     return self.taxon
-    
-    # @property
-    # def assembly(self):
-    #     return self.assembly
-    
-    # @property
-    # def karyotypes(self):
-    #     return self.karyotypes
-    
-    # @property
-    # def gtf_file(self):
-    #     return self.gtf_file
-    
-    # @property
-    # def nodes(self):
-    #     return self.nodes
-    
-    # @property
-    # def edges(self):
-    #     return self.edges
-    
-    # @property
-    # def genome(self):
-    #     return self.genome
 
     def __get_taxonid(self):
         species = self.species
@@ -217,30 +189,79 @@ class GenomeAdapter(Adapter):
             })
         return protein_distinct
     
-    def iterate_nodes(self, gtf_file_path = "genome.gtf.gz"):
-        genome = [
-            {
-                "_id": self.genome.uuid,
-                "labels": ["Genome"],
-                "properties": {
+    def iterate_nodes(self, write_to_disk=True, gtf_file_path = "genome.gtf.gz"):
+        if (write_to_disk):
+            print(f"Running function in write mode. Writing to file {self.node_filename}. To return nodes, set write_to_disk=False in function call")
+            print("Generating genome node")
+            nodes = [
+                {
                     "_id": self.genome.uuid,
-                    "displayName": self.genome.displayName,
-                    "assembly": self.genome.assembly,
-                    "taxon": self.genome.taxon,
-                    "chromosomes": self.chromosome_regions
+                    "labels": ["Genome"],
+                    "properties": {
+                        "_id": self.genome.uuid,
+                        "displayName": self.genome.displayName,
+                        "assembly": self.genome.assembly,
+                        "taxon": self.genome.taxon,
+                        "chromosomes": self.chromosome_regions
+                    }
                 }
-            }
-        ]
-        genomic_intervals = self._generate_genomic_interval_nodes()
-        # Load gtf file into dataframe before processing genes, transcripts, proteins
-        self._gtf = read_gtf(gtf_file_path)
-        self._gtfloaded = True
-        genes = self._generate_gene_nodes()
-        transcripts = self._generate_transcript_nodes()
-        proteins = self._generate_protein_nodes()
-        allNodes = [genome, genomic_intervals, genes, transcripts, proteins]
-        self.nodes = list(itertools.chain(*allNodes))
-        return self.nodes
+            ]
+            print("Writing genome node to file")
+            self.append_to_file(nodes, filepath=self.node_filename)
+            nodes = []
+            print("Generating genomic interval nodes")
+            nodes = self._generate_genomic_interval_nodes()
+            print(f"Writing {len(nodes)} genomic interval nodes to file")
+            self.append_to_file(nodes, filepath=self.node_filename)
+            nodes = []
+            # Load gtf file into dataframe before processing genes, transcripts, proteins
+            self._gtf = read_gtf(gtf_file_path)
+            self._gtfloaded = True
+            print("Generating gene nodes")
+            nodes = self._generate_gene_nodes()
+            print(f"Writing {len(nodes)} gene nodes to file")
+            self.append_to_file(nodes, filepath=self.node_filename)
+            nodes = []
+            print("Generating transcript nodes")
+            nodes = self._generate_transcript_nodes()
+            print(f"Writing {len(nodes)} transcript nodes to file")
+            self.append_to_file(nodes, filepath=self.node_filename)
+            nodes = []
+            print("Generating protein nodes")
+            nodes = self._generate_protein_nodes()
+            print(f"Writing {len(nodes)} protein nodes to file")
+            self.append_to_file(nodes, filepath=self.node_filename)
+            nodes = []
+            print(f"All nodes written to file: {self.node_filename}")
+        else:
+            print("Running function in non-write mode. Returning nodes. To write to file, set write_to_disk=True in function call")
+            genome = [
+                {
+                    "_id": self.genome.uuid,
+                    "labels": ["Genome"],
+                    "properties": {
+                        "_id": self.genome.uuid,
+                        "displayName": self.genome.displayName,
+                        "assembly": self.genome.assembly,
+                        "taxon": self.genome.taxon,
+                        "chromosomes": self.chromosome_regions
+                    }
+                }
+            ]
+            print("Generating genomic interval nodes")
+            genomic_intervals = self._generate_genomic_interval_nodes()
+            # Load gtf file into dataframe before processing genes, transcripts, proteins
+            self._gtf = read_gtf(gtf_file_path)
+            self._gtfloaded = True
+            print("Generating gene nodes")
+            genes = self._generate_gene_nodes()
+            print("Generating transcript nodes")
+            transcripts = self._generate_transcript_nodes()
+            print("Generating protein nodes")
+            proteins = self._generate_protein_nodes()
+            allNodes = [genome, genomic_intervals, genes, transcripts, proteins]
+            self.nodes = list(itertools.chain(*allNodes))
+            return self.nodes
     
     def _generate_genome_to_genomic_interval_edges(self):
         edges = []
@@ -323,17 +344,47 @@ class GenomeAdapter(Adapter):
             })
         return edges
 
-    def iterate_edges(self):
+    def iterate_edges(self, write_to_disk=True):
+        edges = []
         if self._gtfloaded == False:
-            print("Run iterate_nodes() to load in the gtf file, prior to this function being callable")
+            print("Run iterate_nodes() to load in the gtf file, prior to this function being callable. Alternatively, call <INSTANCE>._gtf = <INSTANCE>.read_gtf() and <INSTANCE>._gtfloaded = True")
             return
-        gene_genomic_edges = self._generate_genome_to_genomic_interval_edges()
-        genomic_coordinate_edges = self._generate_genomic_interval_edges()
-        gene_transcript_edges = self._generate_gene_transcript_edges()
-        transcript_protein_edges = self._generate_transcript_protein_edges()
-        allEdges = [gene_genomic_edges, genomic_coordinate_edges, gene_transcript_edges, transcript_protein_edges]
-        self.edges = list(itertools.chain(*allEdges))
-        return self.edges
+        if (write_to_disk):
+            print(f"Running function in write mode. Writing to file {self.edge_filename}. To return edges, set write_to_disk=False in function call")
+            print("Processing genome to genomic interval edges")
+            edges = self._generate_genome_to_genomic_interval_edges()
+            print(f"Writing {len(edges)} genome to genomic interval edges to file")
+            self.append_to_file(edges, filepath=self.edge_filename)
+            edges = []
+            print("Processing genomic interval next edges")
+            edges = self._generate_genomic_interval_edges()
+            print(f"Writing {len(edges)} genomic interval next edges to file")
+            self.append_to_file(edges, filepath=self.edge_filename)
+            edges = []
+            print("Processing gene to transcript edges")
+            edges = self._generate_gene_transcript_edges()
+            print(f"Writing {len(edges)} gene to transcript edges to file")
+            self.append_to_file(edges, filepath=self.edge_filename)
+            edges = []
+            print("Processing transcript to protein edges")
+            edges = self._generate_transcript_protein_edges()
+            print(f"Writing {len(edges)} transcript to protein edges to file")
+            self.append_to_file(edges, filepath=self.edge_filename)
+            edges = []
+            print(f"All edges written to file: {self.edge_filename}")
+        else:
+            print("Running function in non-write mode. Returning edges. To write to file, set write_to_disk=True in function call")
+            print("Processing genome to genomic interval edges")
+            gene_genomic_edges = self._generate_genome_to_genomic_interval_edges()
+            print("Processing genomic interval next edges")
+            genomic_coordinate_edges = self._generate_genomic_interval_edges()
+            print("Processing gene to transcript edges")
+            gene_transcript_edges = self._generate_gene_transcript_edges()
+            transcript_protein_edges = self._generate_transcript_protein_edges()
+            print("Processing transcript to protein edges")
+            allEdges = [gene_genomic_edges, genomic_coordinate_edges, gene_transcript_edges, transcript_protein_edges]
+            print("Returning edges")
+            return list(itertools.chain(*allEdges))
 
     def process_item(self, item):
         """Processes a single item (node or edge)."""
@@ -347,18 +398,78 @@ class GenomeAdapter(Adapter):
         pass
     
     def list_schema(self):
-        return None
-
-    def write_serialized_data_to_file(self, directory=""):
-        node_filepath = os.path.join(directory, self.node_filename)
-        edge_filepath = os.path.join(directory, self.edge_filename)
-
-        with gzip.open(node_filepath, "at") as f:
-            for x in self.nodes:
+        metadata = {
+            "_meta": {
+                "version": "0.0.1",
+                "date_updated": self.current_date_time,
+            },
+            "name": self.displayName,
+            "key": self.key, 
+            "description": self.description,
+            "concepts": {
+                "Gene": {
+                    "label": "Gene",
+                    "dbLabel": "Gene",
+                    "definition": "Gene encompassing all biotypes",
+                },
+                "Transcript": {
+                    "label": "Transcript",
+                    "dbLabel": "Transcript",
+                    "definition": "Transcripts derived from gene",
+                },
+                "Protein": {
+                    "label": "Protein",
+                    "dbLabel": "Protein",
+                    "definition": "Protein derived from gene",
+                },
+                "Genome": {
+                    "label": "Genome",
+                    "dbLabel": "Genome",
+                    "definition": "Genome encompassing this data pack",
+                },
+                "GenomicInterval": {
+                    "label": "Genomic Interval",
+                    "dbLabel": "GenomicInterval",
+                    "definition": "Genomic Interval splitting the genome's chromosomal regions into sections of 1kbp",
+                },
+            },
+            "relationships": {
+                "genome contains interval": {
+                    "from": "Genome",
+                    "to": "GenomicInterval"
+                },
+                "next": {
+                    "from": "GenomicInterval",
+                    "to": "GenomicInterval"
+                },
+                "transcribed to": {
+                    "from": "Gene",
+                    "to": "Transcript"
+                },
+                "has translation": {
+                    "from": "Transcript",
+                    "to": "Protein"
+                },
+            }
+        }
+        return metadata
+    
+    def append_to_file(self, objs, directory="", filepath="obj.jsonl.gz"):
+        with gzip.open(os.path.join(directory, filepath), "at") as f:
+            for x in objs:
                 json.dump(x, f)
                 f.write("\n")
 
-        with gzip.open(edge_filepath, "at") as f:
-            for x in self.edges:
-                json.dump(x, f)
-                f.write("\n")
+    # def write_serialized_data_to_file(self, directory=""):
+    #     node_filepath = os.path.join(directory, self.node_filename)
+    #     edge_filepath = os.path.join(directory, self.edge_filename)
+
+    #     with gzip.open(node_filepath, "at") as f:
+    #         for x in self.nodes:
+    #             json.dump(x, f)
+    #             f.write("\n")
+
+    #     with gzip.open(edge_filepath, "at") as f:
+    #         for x in self.edges:
+    #             json.dump(x, f)
+    #             f.write("\n")
