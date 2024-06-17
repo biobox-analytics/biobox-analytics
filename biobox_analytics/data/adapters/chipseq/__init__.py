@@ -2,6 +2,9 @@ from biobox_analytics.data.adapters._base import Adapter
 import biobox_analytics.data.adapters.chipseq._structs as structs
 import pandas as pd
 import math
+import gzip
+import os
+import json
 from nanoid import generate
 
 class ChipSeqAdapter(Adapter):
@@ -11,7 +14,8 @@ class ChipSeqAdapter(Adapter):
         protein_id: str,
         modification_type: str,
         sample_id: str,
-        bed_filepath: str
+        bed_filepath: str,
+        taxon_id: str = "9601",
     ):
         super().__init__()
         self.name = name
@@ -19,6 +23,7 @@ class ChipSeqAdapter(Adapter):
         self.modification_type = modification_type
         self.sample_id = sample_id
         self.bed_filepath = bed_filepath
+        self.taxon_id = taxon_id
         
         self.chipseq_id = generate()
 
@@ -35,7 +40,7 @@ class ChipSeqAdapter(Adapter):
         return super().iterate_edges()
     
     def process_item(self, item):
-        chr = item.get(0)
+        chr = item.get(0).removeprefix("chr")
         chrom_start = item.get(1)
         chrom_end = item.get(2)
         name = item.get(3)
@@ -77,7 +82,6 @@ class ChipSeqAdapter(Adapter):
             }
         }
 
-        chr_num = chr.removeprefix("chr")
         range_start = math.floor(chrom_start / 1000) * 1000
         edge_peak_start_on = {
             "label": "peak start on",
@@ -85,7 +89,7 @@ class ChipSeqAdapter(Adapter):
                 "uuid": narrow_peak_id
             },
             "to": {
-                "uuid": "XX:{}:{}:{}".format(chr_num, range_start + 1, range_start + 1000)
+                "uuid": "{}:{}:{}:{}".format(self.taxon_id, chr, range_start + 1, range_start + 1000)
             }
         }
 
@@ -96,7 +100,7 @@ class ChipSeqAdapter(Adapter):
                 "uuid": narrow_peak_id
             },
             "to": {
-                "uuid": "XX:{}:{}:{}".format(chr_num, range_end + 1, range_end + 1000)
+                "uuid": "{}:{}:{}:{}".format(self.taxon_id, chr, range_end + 1, range_end + 1000)
             }
         }
 
@@ -170,6 +174,32 @@ class ChipSeqAdapter(Adapter):
                 # else:
                 #     self.nodes.append(object)
 
+    def write(self):
+        obs_file = os.path.join("", "objs.jsonl.gz")
+        edges_file = os.path.join("", "edges.jsonl.gz")
+        with gzip.open(obs_file, "at") as o, gzip.open(edges_file, "at") as e:
+            self.pull_data()
+            iterator = self.iterate_nodes()
+            for object in self.extra_items():
+                # print(object)
+                if "from" in object:
+                    json.dump(object, e)
+                    e.write("\n")
+                else:
+                    json.dump(object, o)
+                    o.write("\n")
+
+            for _, row in iterator:
+                objects = chipseq.process_item(row)
+                for object in objects:
+                    # print(object)
+                    if "from" in object:
+                        json.dump(object, e)
+                        e.write("\n")
+                    else:
+                        json.dump(object, o)
+                        o.write("\n")
+
 
 if __name__ == "__main__":
     chipseq = ChipSeqAdapter(
@@ -179,10 +209,11 @@ if __name__ == "__main__":
         sample_id="sample_id",
         bed_filepath="ENCFF598DYJ.bed"
     )
-    chipseq.build()
-    # for node in chipseq.get_nodes():
-    for node in chipseq.nodes:
-        print(node)
+    chipseq.write()
+    # chipseq.build()
+    # # for node in chipseq.get_nodes():
+    # for node in chipseq.nodes:
+    #     print(node)
 
-    for edge in chipseq.edges:
-        print(edge)
+    # for edge in chipseq.edges:
+    #     print(edge)
