@@ -11,9 +11,11 @@ readme = "README.md"
 readme-content-type = "text/markdown"  # Specify content type for Markdown
 license = { text = "MIT" }
 authors = [
-    { name = "Your Name", email = "your_email@example.com" }
+    {name = "Christopher Li", email = "chris@biobox.io"},
+    {name = "Hamza Farooq", email = "hamza@biobox.io"},
+    {name = "Julian Mazzitelli", email = "julian@biobox.io"}
 ]
-requires-python = ">=3.6"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
