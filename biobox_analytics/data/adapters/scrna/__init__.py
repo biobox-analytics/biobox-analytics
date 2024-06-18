@@ -9,7 +9,7 @@ import itertools
 import scanpy
 import pandas as pd
 
-class ScRNA(Adapter):
+class ScRNAAdapter(Adapter):
     def __init__(
         self,
         h5adFile,

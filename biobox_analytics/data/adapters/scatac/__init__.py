@@ -10,7 +10,7 @@ import itertools
 import scanpy
 import pandas as pd
 
-class ScATAC(Adapter):
+class ScATACAdapter(Adapter):
     def __init__(
         self,
         h5adFile,
