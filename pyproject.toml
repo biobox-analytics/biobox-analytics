@@ -4,6 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "biobox-analytics"
+description = "biobox-analytics CLI for data manipulations using Python"
 version = "0.1.2"
 readme = "README.md"
 readme-content-type = "text/markdown" 
