@@ -1,5 +1,5 @@
 from biobox_analytics.data.adapters._base import Adapter
-import biobox_analytics.data.adapters.chipseq._structs as structs
+# import biobox_analytics.data.adapters.chipseq._structs as structs
 import pandas as pd
 import math
 import gzip
