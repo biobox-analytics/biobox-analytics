@@ -1,0 +1,123 @@
+id: https://ontology.biobox.io/linkml/chipseq
+name: chipseq
+default_prefix: bx
+prefixes:
+  bx: https://ontology.biobox.io/linkml/
+  linkml: https://w3id.org/linkml/
+imports:
+  - linkml:types
+  - ./base
+  - ./genome
+
+classes:
+  ChipSeq:
+    is_a: EpigeneticExperiment
+    description: >-
+      A method to determine the genomic regions that proteins bind to.
+
+  NarrowPeak:
+    is_a: Object
+    description: >-
+      Peaks of signal enrichment based on pooled, normalized (interpreted) data. It is a BED6+4 format.
+    slots:
+      - chr
+      - start
+      - end
+      - strand
+    attributes:
+      score:
+        range: integer
+        description: >-
+          Indicates how dark the peak will be displayed in the browser (0-1000). 
+          If all scores were "'0"' when the data were submitted to the DCC, 
+          the DCC assigned scores 1-1000 based on signal value. 
+          Ideally the average signalValue per base spread is between 100-1000.
+      signalValue:
+        range: float
+        description: >-
+          Measurement of overall (usually, average) enrichment for the region.
+      pValue:
+        range: float
+        description: >-
+          Measurement of statistical significance (-log10). Use -1 if no pValue is assigned.
+      qValue:
+        range: float
+        description: >-
+          Measurement of statistical significance using false discovery rate (-log10). Use -1 if no qValue is assigned.
+      peak:
+        range: integer
+        description: >-
+          Point-source called for this peak; 0-based offset _from chromStart. Use -1 if no point-source called.
+
+  # Edges
+
+  assay target on:
+    is_a: Edge
+    description: >-
+      Describes the target for the immuno-precipitation and/or pull down assay.
+    slot_usage:
+      _from:
+        range: ChipSeq
+      to:
+        range: Protein
+    attributes:
+      modification:
+        range: string
+      position:
+        range: integer
+      residue:
+        range: string
+    slots:
+      - modification_type
+
+  has experiment:
+    is_a: Edge
+    description: >-
+      Sample has experiment
+    slot_usage:
+      _from:
+        range: Sample
+      to:
+        range: ChipSeq
+
+  has peak:
+    is_a: Edge
+    description: >-
+      seq experiment that generated bed peaks
+    slot_usage:
+      _from:
+        range: ChipSeq
+      to:
+        range: NarrowPeak
+
+  peak start on:
+    is_a: Edge
+    description: >-
+      maps the starting position of the peak coverage interval
+    slot_usage:
+      _from:
+        range: ChipSeq
+      to:
+        range: GenomicInterval
+
+  peak end on:
+    is_a: Edge
+    description: >-
+      maps the end position of the peak coverage interval
+    slot_usage:
+      _from:
+        range: ChipSeq
+      to:
+        range: GenomicInterval
+
+
+
+
+slots:
+  modification_type:
+    range: ModificationTypes
+
+enums:
+  ModificationTypes:
+    permissible_values:
+      PTM:

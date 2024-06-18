@@ -1,0 +1,121 @@
+id: https://ontology.biobox.io/linkml/genome
+name: genome
+default_prefix: bx
+prefixes:
+  bx: https://ontology.biobox.io/linkml/
+  linkml: https://w3id.org/linkml/
+imports:
+  - linkml:types
+  - ./base
+
+classes:
+  Genome:
+    is_a: Object
+    slots:
+      - assembly
+      - taxon
+      - species
+
+  GenomicInterval:
+    is_a: Object
+    slots:
+      - chr
+      - start
+      - end
+      - taxon
+      - species
+
+  Gene:
+    is_a: Object
+    description: >-
+      A region (or regions) that includes all of the sequence elements necessary to encode a functional transcript. 
+      A gene may include regulatory regions, transcribed regions and/or other functional sequence regions.
+    slots:
+      - chr
+      - start
+      - end
+      - assembly
+      - taxon
+      - strand
+
+  Transcript:
+    is_a: Object
+    slots:
+      - chr
+      - start
+      - end
+      - assembly
+      - taxon
+
+  Protein:
+    is_a: Object
+    slots:
+      - assembly
+      - taxon
+
+  genome contains interval:
+    is_a: Edge
+    slot_usage:
+      _from:
+        range: Genome
+        required: true
+      to:
+        range: GenomicInterval
+        required: true
+
+  has translation:
+    is_a: Edge
+    slot_usage:
+      _from:
+        range: Transcript
+        required: true
+      to:
+        range: Protein
+        required: true
+
+  transcribed to:
+    is_a: Edge
+    slot_usage:
+      _from:
+        range: Gene
+        required: true
+      to:
+        range: Transcript
+        required: true
+
+slots:
+  chr:
+    range: string
+    description: >-
+      Name of the chromosome (or contig, scaffold, etc.)
+
+  start:
+    range: integer
+    description: >-
+      The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 1
+
+  end:
+    range: integer
+    description: >-
+      The ending position of the feature in the chromosome or scaffold.
+      The chromEnd base is not included in the display of the feature.
+      For example, the first 100 bases of a chromosome are defined as chromStart=1, chromEnd=100, 
+      and span the bases numbered 1-100.
+
+  strand:
+    range: string
+    description: >-
+      +/- to denote strand or orientation (whenever applicable). Use "." if no orientation is assigned.
+
+  assembly:
+    range: string
+
+  taxon:
+    required: true
+    range: integer
+
+  species:
+    required: true
+    range: string
+    description: >-
+      Is the full species name is lower case (e.g. homo sapiens)
