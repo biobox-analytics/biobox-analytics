@@ -194,7 +194,7 @@ class ChipSeqAdapter(Adapter):
                     o.write("\n")
 
             for _, row in iterator:
-                objects = chipseq.process_item(row)
+                objects = self.process_item(row)
                 for object in objects:
                     # print(object)
                     if "from" in object:
