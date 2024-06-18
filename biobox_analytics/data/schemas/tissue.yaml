@@ -1,0 +1,1062 @@
+id: https://ontology.biobox.io/linkml/tissue
+name: tissue
+default_prefix: bx
+prefixes:
+  bx: https://ontology.biobox.io/linkml/
+  linkml: https://w3id.org/linkml/
+imports:
+  - linkml:types
+  - ./base
+
+classes:
+  Tissue:
+    is_a: Object
+    description: >-
+      Multicellular anatomical structure that consists of many cells of one or a few types, 
+      arranged in an extracellular matrix such that their long-range organisation is at least partly a 
+      repetition of their short-range organisation.
+  
+  #  === EDGES ===
+  is a:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  part_of:
+    is_a: Edge
+    description: a core relation that holds between a part and its whole
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  continuous_with:
+    is_a: Edge
+    description: X continuous_with Y if and only if X and Y share a fiat boundary.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  contributes_to_morphology_of:
+    is_a: Edge
+    description: 'p contributes to morphology of w if and only if a change in the morphology
+      of p entails a change in the morphology of w. Examples: every skull contributes
+      to morphology of the head which it is a part of. Counter-example: nuclei do not
+      generally contribute to the morphology of the cell they are part of, as they are
+      buffered by cytoplasm.'
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  connects:
+    is_a: Edge
+    description: c connects a if and only if there exist some b such that a and b are
+      similar parts of the same system, and c connects b, specifically, c connects a
+      with b. When one structure connects two others it unites some aspect of the function
+      or role they play within the system.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  develops_from:
+    is_a: Edge
+    description: x develops from y if and only if either (a) x directly develops from
+      y or (b) there exists some z such that x directly develops from z and z develops
+      from y
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  has_skeleton:
+    is_a: Edge
+    description: A relation between a segment or subdivision of an organism and the
+      maximal subdivision of material entities that provides structural support for
+      that segment or subdivision.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  has_part:
+    is_a: Edge
+    description: a core relation that holds between a whole and its part
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  immediate_transformation_of:
+    is_a: Edge
+    description: x immediate transformation of y iff x immediately succeeds y temporally
+      at a time boundary t, and all of the matter present in x at t is present in y
+      at t, and all the matter in y at t is present in x at t
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  immediately_deep_to:
+    is_a: Edge
+    description: x immediately deep to y iff x deep_to y and x is contiguous with y.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  composed_primarily_of:
+    is_a: Edge
+    description: x composed_primarily_of y if and only if more than half of the mass
+      of x is made from y or units of the same type as y.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  in_lateral_side_of:
+    is_a: Edge
+    description: X in lateral side of Y <=> if X is in left side of Y or X is in right
+      side of Y. X is often, but not always a paired structure
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  existence_ends_during:
+    is_a: Edge
+    description: 'x existence ends during y if and only if the time point at which x
+      ends is before or equivalent to the time point at which y ends and after or equivalent
+      to the point at which y starts. Formally: x existence ends during y iff ω(x) <=
+      ω(y) and ω(x) >= α(y).'
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  attached_to:
+    is_a: Edge
+    description: a is attached to b if and only if a and b are discrete objects or object
+      parts, and there are physical connections between a and b such that a force pulling
+      a will move b, or a force pulling b will move a
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  has_component:
+    is_a: Edge
+    description: w 'has component' p if w 'has part' p and w is such that it can be
+      directly disassembled into into n parts p, p2, p3, ..., pn, where these parts
+      are of similar type.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  has_potential_to_develop_into:
+    is_a: Edge
+    description: x has the potential to develop into y iff x develops into y or if x
+      is capable of developing into y
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  located_in:
+    is_a: Edge
+    description: a relation between two independent continuants, the target and the
+      location, in which the target is entirely within the location
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  location_of:
+    is_a: Edge
+    description: a relation between two independent continuants, the location and the
+      target, in which the target is entirely within the location
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  extends_fibers_into:
+    is_a: Edge
+    description: X extends_fibers into Y iff there exists some neuron (N) and N has_soma_location
+      X and N 'has synaptic IO in region' some Y
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  channel_for:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  channels_from:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  channels_into:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  conduit_for:
+    is_a: Edge
+    description: x is a conduit for y iff y overlaps through the lumen_of of x, and
+      y has parts on either side of the lumen of x.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  adjacent_to:
+    is_a: Edge
+    description: x adjacent to y if and only if x and y share a boundary.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  existence_ends_during_or_before:
+    is_a: Edge
+    description: x existence ends during or before y if and only if the time point at
+      which x ends is before or equivalent to the time point at which y ends.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  has_2D_boundary:
+    is_a: Edge
+    description: a relation between a material entity and a 2D immaterial entity (the
+      boundary), in which the boundary delimits the material entity
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  preceded_by:
+    is_a: Edge
+    description: 'x is preceded by y if and only if the time point at which y ends is
+      before or equivalent to the time point at which x starts. Formally: x preceded
+      by y iff ω(y) <= α(x), where α is a function that maps a process to a start point,
+      and ω is a function that maps a process to an end point.'
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  precedes:
+    is_a: Edge
+    description: 'x precedes y if and only if the time point at which x ends is before
+      or equivalent to the time point at which y starts. Formally: x precedes y iff
+      ω(x) <= α(y), where α is a function that maps a process to a start point, and
+      ω is a function that maps a process to an end point.'
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  immediately_preceded_by:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  ends:
+    is_a: Edge
+    description: inverse of ends with
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  surrounded_by:
+    is_a: Edge
+    description: x surrounded_by y if and only if (1) x is adjacent to y and for every
+      region r that is adjacent to x, r overlaps y (2) the shared boundary between x
+      and y occupies the majority of the outermost boundary of x
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  developmentally_replaces:
+    is_a: Edge
+    description: x developmentally replaces y if and only if there is some developmental
+      process that causes x to move or to cease to exist, and for the site that was
+      occupied by x to become occupied by y, where y either comes into existence in
+      this site or moves to this site from somewhere else
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  developmentally_induced_by:
+    is_a: Edge
+    description: t1 induced_by t2 if there is a process of developmental induction (GO:0031128)
+      with t1 and t2 as interacting participants. t2 causes t1 to change its fate from
+      a precursor material anatomical entity type T to T', where T' develops_from T
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  existence_starts_during:
+    is_a: Edge
+    description: 'x existence starts during y if and only if the time point at which
+      x starts is after or equivalent to the time point at which y starts and before
+      or equivalent to the time point at which y ends. Formally: x existence starts
+      during y iff α(x) >= α(y) & α(x) <= ω(y).'
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  overlaps:
+    is_a: Edge
+    description: x overlaps y iff they have some part in common.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  ends_with:
+    is_a: Edge
+    description: 'x ends with y if and only if x has part y and the time point at which
+      x ends is equivalent to the time point at which y ends. Formally: α(y) > α(x)
+      ∧ ω(y) = ω(x), where α is a function that maps a process to a start point, and
+      ω is a function that maps a process to an end point.'
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  starts:
+    is_a: Edge
+    description: inverse of starts with
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  transformation_of:
+    is_a: Edge
+    description: x transformation of y if x is the immediate transformation of y, or
+      is linked to y through a chain of transformation relationships
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  bounding_layer_of:
+    is_a: Edge
+    description: 'X outer_layer_of Y iff:
+
+      . X :continuant that bearer_of some PATO:laminar
+
+      . X part_of Y
+
+      . exists Z :surface
+
+      . X has_boundary Z
+
+      . Z boundary_of Y
+
+
+      has_boundary: http://purl.obolibrary.org/obo/RO_0002002
+
+      boundary_of: http://purl.obolibrary.org/obo/RO_0002000'
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  surrounds:
+    is_a: Edge
+    description: inverse of surrounded by
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  anterior_to:
+    is_a: Edge
+    description: x anterior to y iff x is further along the antero-posterior axis than
+      y, towards the head. An antero-posterior axis is an axis that extends through
+      an organism from head end to opposite end of body or tail.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  has_developmental_contribution_from:
+    is_a: Edge
+    description: x has developmental contribution from y iff x has some part z such
+      that z develops from y
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  proximalmost_part_of:
+    is_a: Edge
+    description: X proximalmost part of Y <=> X is in proximal side of Y and X is adjacent
+      to the proximal boundary of Y
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  luminal_space_of:
+    is_a: Edge
+    description: s is luminal space of x iff s is lumen_of x and s is an immaterial
+      entity
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  subdivision_of:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  has_member:
+    is_a: Edge
+    description: has member is a mereological relation between a collection and an item.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  produced_by:
+    is_a: Edge
+    description: a produced_by b iff some process that occurs_in b has_output a.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  dorsal_to:
+    is_a: Edge
+    description: x dorsal to y iff x is further along the dorso-ventral axis than y,
+      towards the back. A dorso-ventral axis is an axis that extends through an organism
+      from back (e.g. spinal column) to front (e.g. belly).
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  has_muscle_origin:
+    is_a: Edge
+    description: m has_muscle_origin s iff m is attached_to s, and it is the case that
+      when m contracts, s does not move. The site of the origin tends to be more proximal
+      and have greater mass than what the other end attaches to.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  has_muscle_insertion:
+    is_a: Edge
+    description: m has_muscle_insertion s iff m is attaches_to s, and it is the case
+      that when m contracts, s moves. Insertions are usually connections of muscle via
+      tendon to bone.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  existence_starts_and_ends_during:
+    is_a: Edge
+    description: 'x exists during y if and only if: 1) the time point at which x begins
+      to exist is after or equal to the time point at which y begins and 2) the time
+      point at which x ceases to exist is before or equal to the point at which y ends.
+      Formally: x existence starts and ends during y iff α(x) >= α(y) & α(x) <= ω(y)
+      & ω(x) <= ω(y) & ω(x) >= α(y)'
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  innervates:
+    is_a: Edge
+    description: 'Relation between a ''neuron projection bundle'' and a region in which
+      one or more of its component neuron projections either synapses to targets or
+      receives synaptic input.
+
+      T innervates some R
+
+      Expands_to: T has_fasciculating_neuron_projection that synapse_in some R.'
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  branching_part_of:
+    is_a: Edge
+    description: x is a branching part of y if and only if x is part of y and x is connected
+      directly or indirectly to the main stem of y
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  innervated_by:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  attached_to_part_of:
+    is_a: Edge
+    description: a is attached to part of b if a is attached to b, or a is attached
+      to some p, where p is part of b.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  produces:
+    is_a: Edge
+    description: 'a produces b if some process that occurs_in a has_output b, where
+      a and b are material entities. Examples: hybridoma cell line produces monoclonal
+      antibody reagent; chondroblast produces avascular GAG-rich matrix.'
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  in_left_side_of:
+    is_a: Edge
+    description: X in left side of Y <=> if Y is subdivided into two left and right
+      portions, X is part of the left portion.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  connected_to:
+    is_a: Edge
+    description: a is connected to b if and only if a and b are discrete structure,
+      and there exists some connecting structure c, such that c connects a and b
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  drains:
+    is_a: Edge
+    description: Relation between an collecting structure and another structure, where
+      the collecting structure acts as a conduit channeling fluid, substance or energy
+      away from the other structure.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  supplies:
+    is_a: Edge
+    description: Relation between an arterial structure and another structure, where
+      the arterial structure acts as a conduit channeling fluid, substance or energy.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  connecting_branch_of:
+    is_a: Edge
+    description: b connecting-branch-of s iff b is connected to s, and there exists
+      some tree-like structure t such that the mereological sum of b plus s is either
+      the same as t or a branching-part-of t.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  sexually_homologous_to:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  existence_starts_with:
+    is_a: Edge
+    description: 'x starts ends with y if and only if the time point at which x starts
+      is equivalent to the time point at which y starts. Formally: x existence starts
+      with y iff α(x) = α(y).'
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  existence_ends_with:
+    is_a: Edge
+    description: 'x existence ends with y if and only if the time point at which x ends
+      is equivalent to the time point at which y ends. Formally: x existence ends with
+      y iff ω(x) = ω(y).'
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  intersects_midsagittal_plane_of:
+    is_a: Edge
+    description: X intersects median plane of iff X crosses the midine plane of Y.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  in_anterior_side_of:
+    is_a: Edge
+    description: X anterior side of Y <=> if Y is subdivided into two anterior and posterior
+      portions, X is part of the anterior portion.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  anteriorly_connected_to:
+    is_a: Edge
+    description: x anteriorly_connected_to y iff the anterior part of x is connected
+      to y. i.e. x connected_to y and x posterior_to y.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  posteriorly_connected_to:
+    is_a: Edge
+    description: x posteriorly_connected_to y iff the posterior part of x is connected
+      to y. i.e. x connected_to y and x anterior_to y.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  proximally_connected_to:
+    is_a: Edge
+    description: x proximally_connected_to y iff the proximal part of x is connected
+      to y. i.e. x connected_to y and x distal_to y.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  distally_connected_to:
+    is_a: Edge
+    description: x distally_connected_to y iff the distal part of x is connected to
+      y. i.e. x connected_to y and x proximal_to y.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  preaxialmost_part_of:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  distalmost_part_of:
+    is_a: Edge
+    description: X distalmost part of Y <=> X is in distal side of Y and X is adjacent
+      to the distal boundary of Y
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  posterior_to:
+    is_a: Edge
+    description: x posterior to y iff x is further along the antero-posterior axis than
+      y, towards the body/tail. An antero-posterior axis is an axis that extends through
+      an organism from head end to opposite end of body or tail.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  tributary_of:
+    is_a: Edge
+    description: x tributary_of y if and only if x a channel for the flow of a substance
+      into y, where y is larger than x. If x and y are hydrographic features, then y
+      is the main stem of a river, or a lake or bay, but not the sea or ocean. If x
+      and y are anatomical, then y is a vein.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  has_muscle_antagonist:
+    is_a: Edge
+    description: m1 has_muscle_antagonist m2 iff m1 has_muscle_insertion s, m2 has_muscle_insection
+      s, m1 acts in opposition to m2, and m2 is responsible for returning the structure
+      to its initial position.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  in_right_side_of:
+    is_a: Edge
+    description: X in right side of Y <=> if Y is subdivided into two left and right
+      portions, X is part of the right portion.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  protects:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  lumen_of:
+    is_a: Edge
+    description: x lumen_of y iff x is the space or substance that is part of y and
+      does not cross any of the inner membranes or boundaries of y that is maximal with
+      respect to the volume of the convex hull.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  develops_in:
+    is_a: Edge
+    description: x develops_in y if x is located in y whilst x is developing
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  derived_from_ancestral_fusion_of:
+    is_a: Edge
+    description: 'x has_fused_element y iff: there exists some z : x has_part z, z homologous_to
+      y, and y is a distinct element, the boundary between x and z is largely fiat'
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  anastomoses_with:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  filtered_through:
+    is_a: Edge
+    description: Relationship between a fluid and a material entity, where the fluid
+      is the output of a realization of a filtration role that inheres in the material
+      entity.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  postaxialmost_part_of:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  skeleton_of:
+    is_a: Edge
+    description: inverse of has skeleton
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  directly_develops_from:
+    is_a: Edge
+    description: 'Candidate definition: x directly_develops from y if and only if there
+      exists some developmental process (GO:0032502) p such that x and y both participate
+      in p, and x is the output of p and y is the input of p, and a substantial portion
+      of the matter of x comes from y, and the start of x is coincident with or after
+      the end of y.'
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  develops_from_part_of:
+    is_a: Edge
+    description: x develops from part of y if and only if there exists some z such that
+      x develops from z and z is part of y
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  indirectly_supplies:
+    is_a: Edge
+    description: a indirectly_supplies s iff a has a branch and the branch supplies
+      or indirectly supplies s.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  in_posterior_side_of:
+    is_a: Edge
+    description: X posterior side of Y <=> if Y is subdivided into two anterior and
+      posterior portions, X is part of the posterior portion.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  deep_to:
+    is_a: Edge
+    description: Further away from the surface of the organism. Thus, the muscular layer
+      is deep to the skin, but superficial to the intestines.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  superficial_to:
+    is_a: Edge
+    description: Near the outer surface of the organism. Thus, skin is superficial to
+      the muscle layer.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  immediately_superficial_to:
+    is_a: Edge
+    description: x immediately superficial to y iff x superficial to y and x is contiguous
+      with y.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  serially_homologous_to:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  ventral_to:
+    is_a: Edge
+    description: x ventral to y iff x is further along the dorso-ventral axis than y,
+      towards the front. A dorso-ventral axis is an axis that extends through an organism
+      from back (e.g. spinal column) to front (e.g. belly).
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  trunk_part_of:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  distal_to:
+    is_a: Edge
+    description: x distal to y iff x is further along the proximo-distal axis than y,
+      towards the appendage tip. A proximo-distal axis extends from tip of an appendage
+      (distal) to where it joins the body (proximal).
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  proximal_to:
+    is_a: Edge
+    description: x proximal to y iff x is closer to the point of attachment with the
+      body than y.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  in_deep_part_of:
+    is_a: Edge
+    description: X superficial part of Y <=> if Y is subdivided into two superficial
+      and deep portions, X is part of the deep portion.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  in_superficial_part_of:
+    is_a: Edge
+    description: X superficial part of Y <=> if Y is subdivided into two superficial
+      and deep portions, X is part of the superficial portion.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  in_dorsal_side_of:
+    is_a: Edge
+    description: X dorsal side of Y <=> if Y is subdivided into two dorsal and ventral
+      portions, X is part of the dorsal portion.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  has_potential_to_developmentally_contribute_to:
+    is_a: Edge
+    description: x has potential to developmentrally contribute to y iff x developmentally
+      contributes to y or x is capable of developmentally contributing to y
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  in_ventral_side_of:
+    is_a: Edge
+    description: X ventral side of Y <=> if Y is subdivided into two dorsal and ventral
+      portions, X is part of the ventral portion.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  layer_part_of:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  in_distal_side_of:
+    is_a: Edge
+    description: x in distal side of y <=> if y is subdivided into two proximal and
+      distal portions, y is part of the distal portion.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  in_proximal_side_of:
+    is_a: Edge
+    description: x in proximal side of y <=> if y is subdivided into two proximal and
+      distal portions, y is part of the proximal portion.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  in_innermost_side_of:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  in_outermost_side_of:
+    is_a: Edge
+    description: ''
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  aboral_to:
+    is_a: Edge
+    description: nearer to the aboral opening of the organism, on the oral-aboral axis.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  existence_starts_during_or_after:
+    is_a: Edge
+    description: 'x existence starts during or after y if and only if the time point
+      at which x starts is after or equivalent to the time point at which y starts.
+      Formally: x existence starts during or after y iff α (x) >= α (y).'
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  in_central_side_of:
+    is_a: Edge
+    description: X in_central_side Y <=> if Y is subdivided into left and right portions
+      around some median divisor, all parts of X are closer to the median divisor than
+      the outermost lateral sides.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  immediately_anterior_to:
+    is_a: Edge
+    description: x immediately anterior to y iff x anterior to y and x is contiguous
+      with y.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  immediately_posterior_to:
+    is_a: Edge
+    description: x immediately posterior to y iff x posterior_to y and x is contiguous
+      with y.
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue
+  develops_into:
+    is_a: Edge
+    description: inverse of develops from
+    slot_usage:
+      _from:
+        range: Tissue
+      to:
+        range: Tissue

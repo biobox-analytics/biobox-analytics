@@ -1,0 +1,79 @@
+id: https://ontology.biobox.io/linkml/
+name: bx
+default_range: string
+default_prefix: bx
+prefixes:
+  bx: https://ontology.biobox.io/linkml/
+  linkml: https://w3id.org/linkml/
+imports:
+  - linkml:types
+
+classes:
+  Object:
+    slots:
+      - uuid
+      - displayName
+      - description
+      - dateCreated
+      - dateUpdated
+
+  Node:
+    slots:
+      - _id
+      - labels
+
+  Edge:
+    slots:
+      - _from
+      - to
+      - label
+
+  Sample:
+    is_a: Object
+
+  Donor:
+    is_a: Object
+
+  Experiment:
+    is_a: Object
+
+  EpigeneticExperiment:
+    is_a: Experiment
+
+slots:
+  uuid:
+    range: string
+
+  displayName:
+    required: true
+    range: string
+
+  description:
+    range: string
+
+  dateCreated:
+    range: datetime
+
+  dateUpdated:
+    range: datetime
+
+  _from:
+    required: true
+    range: Object
+
+  to:
+    required: true
+    range: Object
+
+  label:
+    required: true
+    range: string
+
+  _id:
+    required: true
+    range: string
+
+  labels:
+    range: string
+    array:
+      minimum_number_dimensions: 1
