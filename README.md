@@ -21,5 +21,9 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent"
 ]
-dependencies = []
-urls = { "Homepage" = "https://github.com/yourusername/biobox_analytics" }
+dependencies = [
+  "scanpy",
+  "gtfparse",
+  "pandas"
+]
+urls = { "Homepage" = "https://github.com/biobox-analytics/biobox_analytics" }
