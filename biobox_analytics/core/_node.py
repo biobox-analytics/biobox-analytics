@@ -9,7 +9,6 @@ from urllib.parse import quote
 import json
     
 class Node:
-
     @classmethod
     def search_by_name(cls, searchtext, limit=50, offset=0):
         res = requests.post(
@@ -34,8 +33,7 @@ class Node:
         objs = []
 
         for o in data['data']:
-            
-            objs.extend(cls(uuid=o["uuid"], db_label=))
+            objs.extend(cls(uuid=o["uuid"], db_label=None, concept_labels=o['dbLabels'], properties=o['properties']))
 
         return cls(data)
 
@@ -96,7 +94,10 @@ class Node:
 
     def __generate_relationship_methods(self):
         for relationship in self._relationships:
-            rel_name = relationship['relationship']['label'].replace(" ", "_")
+            direction = 'inbound'
+            if (relationship['outbound'] == True):
+                direction = 'outbound'
+            rel_name = relationship['relationship']['label'].replace(" ", "_") + "_" + direction
             setattr(self, rel_name, self.__create_relationship_method(rel_name, relationship))
 
     def __getattr__(self, name):

@@ -35,6 +35,17 @@ class RelationshipGroup:
             "dbLabelToMatch": self._dbLabelToMatch
         }
     
+    def fetchAll(self, limit=10):
+        if (limit < 1):
+            print("Limit must be greater than 1")
+            return
+        currentOffset = 0
+        result = []
+        while (currentOffset < self._count):
+            result.extend(self.fetch(limit=limit, offset=currentOffset))
+            currentOffset += limit
+        return result
+    
     
     def fetch(self, limit=10, offset=0):
         res = requests.post(
