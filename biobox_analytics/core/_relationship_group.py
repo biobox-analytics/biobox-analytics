@@ -7,13 +7,13 @@ from biobox_analytics.core._concept import Concept
 from urllib.parse import quote
 import json
 
-class Relationship:
+class RelationshipGroup:
     def __init__(self, name, relationshipGroup, objUUID):
         self._objectID = objUUID
         self._name = name
         self._relationship = relationshipGroup['relationship']
         self._directionality = 'outbound'
-        self._count =relationshipGroup.get('total')
+        self._count = relationshipGroup.get('total')
         self._dbLabelToMatch = relationshipGroup['relationship']['range'][0]['dbLabel']
         if relationshipGroup['outbound'] == False:
             self._directionality = 'inbound'

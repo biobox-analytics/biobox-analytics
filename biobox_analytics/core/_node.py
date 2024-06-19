@@ -4,35 +4,95 @@ BioBox Node
 import requests
 import biobox_analytics._setup as _setup
 from biobox_analytics.core._concept import Concept
-from biobox_analytics.core._relationship import Relationship
+from biobox_analytics.core._relationship_group import RelationshipGroup
 from urllib.parse import quote
 import json
     
 class Node:
 
-    def __init__(self, uuid, db_label):
-        self.uuid = uuid
-        self.db_label = db_label
-        bx_data = self._load()
+    @classmethod
+    def search_by_name(cls, searchtext, limit=50, offset=0):
+        res = requests.post(
+            f"{_setup.BIOBOX_REST_API}/bioref/object/searchbyname",
+            headers={
+                'x-biobox-orgid': _setup.BIOBOX_ORGID,
+                'Authorization': f'Bearer {_setup.BIOBOX_TOKEN}'
+            },
+            json={
+                'displayName': searchtext,
+                'limit': limit,
+                'offset': offset,
+            }
+        )
 
+        res.raise_for_status()
+
+        data = res.json()
+
+        print(f"Found {data['total']} objects matching search text")
+
+        objs = []
+
+        for o in data['data']:
+            
+            objs.extend(cls(uuid=o["uuid"], db_label=))
+
+        return cls(data)
+
+    def __init__(self, uuid, db_label, concept_labels=None, properties=None):
+        self.uuid = uuid
+        if db_label != None:
+            self.db_label = db_label
+        elif (concept_labels != None):
+            if 'CellLine' in concept_labels:
+                self.db_label = 'CellLine'
+            elif 'CellType' in concept_labels:
+                self.db_label = 'CellType'
+            elif 'Disease' in concept_labels:
+                self.db_label = 'Disease'
+            elif 'EFO' in concept_labels:
+                self.db_label = 'EFO'
+            elif 'Gene' in concept_labels:
+                self.db_label = 'Gene'
+            elif 'Pathway' in concept_labels:
+                self.db_label = 'Pathway'
+            elif 'Phenotype' in concept_labels:
+                self.db_label = 'Phenotype'
+            elif 'Protein' in concept_labels:
+                self.db_label = 'Protein'
+            elif 'Tissue' in concept_labels:
+                self.db_label = 'Tissue'
+            else:
+                print("Concept db_labels did not match a known type. Defaulting to Object.")
+                self.db_label = 'Object'
+        else:
+            print("Could not determine db_label of object. Defaulting to Object.")
+            self.db_label = 'Object'
         self._exists = False
 
-        if bx_data is not None:
-            self._exists = True
+        if (properties != None):
             self._data = bx_data
+            self._exists = True
         else:
-            self._data = {
-                'uuid': uuid,
-                'displayName': 'Node'
-            }
-        if 'relationshipMetadata' in bx_data.keys():
-            self._relationships = bx_data['relationshipMetadata']
-            self.__generate_relationship_methods()
-        self.concept = Concept.get(db_label)
-
+            bx_data = self._load()
+            if bx_data is not None:
+                self._exists = True
+                self._data = bx_data
+            else:
+                self._data = {
+                    'uuid': uuid,
+                    'displayName': 'Node'
+                }
+            if 'relationshipMetadata' in self._data.keys():
+                self._relationships = self._data['relationshipMetadata']
+                self.__generate_relationship_methods()
+        # if concept_labels != None:
+        #     self.concept = concept_labels
+        # else:
+        #     self.concept = Concept.get(db_label)
 
     def __create_relationship_method(self, name, relationship):
-        return Relationship(name, relationship, self.uuid)
+        return RelationshipGroup(name, relationship, self.uuid)
 
     def __generate_relationship_methods(self):
         for relationship in self._relationships:

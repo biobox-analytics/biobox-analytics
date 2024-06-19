@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "biobox_analytics"
-version = "0.1.2"
+version = "0.1.4"
 description = "BioBox CLI for data manipulation in python"
 readme = "README.md"
 readme-content-type = "text/markdown"  # Specify content type for Markdown
@@ -21,5 +21,8 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent"
 ]
-dependencies = []
-urls = { "Homepage" = "https://github.com/yourusername/biobox_analytics" }
+dependencies = [
+  "scanpy",
+  "gtfparse"
+]
+urls = { "Homepage" = "https://github.com/biobox-analytics/biobox-analytics" }
