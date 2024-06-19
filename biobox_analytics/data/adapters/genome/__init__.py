@@ -202,7 +202,7 @@ class GenomeAdapter(Adapter):
                         "displayName": self.genome.displayName,
                         "assembly": self.genome.assembly,
                         "taxon": self.genome.taxon,
-                        "chromosomes": self.chromosome_regions
+                        "chromosomes": json.dumps(self.chromosome_regions)
                     }
                 }
             ]
