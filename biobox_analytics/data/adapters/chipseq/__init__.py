@@ -5,6 +5,7 @@ import math
 import gzip
 import os
 import json
+import datetime
 from nanoid import generate
 
 class ChipSeqAdapter(Adapter):
@@ -170,7 +171,7 @@ class ChipSeqAdapter(Adapter):
             print(object)
 
         for _, row in iterator:
-            objects = chipseq.process_item(row)
+            objects = self.process_item(row)
             for object in objects:
                 print(object)
                 # if "from" in object:
@@ -203,3 +204,49 @@ class ChipSeqAdapter(Adapter):
                     else:
                         json.dump(object, o)
                         o.write("\n")
+
+    def list_schema(self):
+        metadata = {
+            "_meta": {
+                "version": "0.0.1",
+                "date_updated": str(datetime.datetime.now()),
+            },
+            "name": self.name,
+            "key": self.name, 
+            "description": "",
+            "concepts": {
+                "NarrowPeak": {
+                    "label": "NarrowPeak",
+                    "dbLabel": "NarrowPeak",
+                    "definition": "",
+                },
+                "ChIPseq": {
+                    "label": "ChIPseq",
+                    "dbLabel": "ChIPseq",
+                    "definition": "",
+                },
+            },
+            "relationships": {
+                "has narrow peak": {
+                    "from": "ChIPseq",
+                    "to": "NarrowPeak"
+                },
+                "peak start on": {
+                    "from": "NarrowPeak",
+                    "to": "GenomicInterval"
+                },
+                "peak end on": {
+                    "from": "NarrowPeak",
+                    "to": "GenomicInterval"
+                },
+                "assay target on": {
+                    "from": "ChIPseq",
+                    "to": "Protein"
+                },
+                "has chipseq": {
+                    "from": "Sample",
+                    "to": "ChIPseq"
+                }
+            }
+        }
+        return metadata
