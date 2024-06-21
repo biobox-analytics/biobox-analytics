@@ -29,16 +29,17 @@ class Node:
         data = res.json()
 
         print(f"Found {data['total']} objects matching search text")
-
         objs = []
 
+        # print(data['data'])
         for o in data['data']:
-            objs.extend(cls(uuid=o["uuid"], db_label=None, concept_labels=o['dbLabels'], properties=o['properties']))
+            item = Node(uuid=o["uuid"], db_label=None, concept_labels=o['dbLabels'],properties=o['properties'], enable_loading=False)
+            objs.append(item)
+        return objs
 
-        return cls(data)
-
-    def __init__(self, uuid, db_label, concept_labels=None, properties=None):
+    def __init__(self, uuid, db_label=None, concept_labels=None, properties=None, enable_loading=True):
         self.uuid = uuid
+        self._loaded = False
         if db_label != None:
             self.db_label = db_label
         elif (concept_labels != None):
@@ -61,18 +62,17 @@ class Node:
             elif 'Tissue' in concept_labels:
                 self.db_label = 'Tissue'
             else:
-                print("Concept db_labels did not match a known type. Defaulting to Object.")
                 self.db_label = 'Object'
         else:
-            print("Could not determine db_label of object. Defaulting to Object.")
             self.db_label = 'Object'
         self._exists = False
 
         if (properties != None):
-            self._data = bx_data
+            self._data = properties
             self._exists = True
-        else:
-            bx_data = self._load()
+        elif(enable_loading):
+            bx_data = self._load(self.uuid)
+            self._loaded = True
             if bx_data is not None:
                 self._exists = True
                 self._data = bx_data
@@ -108,6 +108,41 @@ class Node:
             return attribute.metadata
 
     @property
+    def relationshipGroups(self):
+        rels = []
+        for rel in self._relationships:
+            direction = "inbound"
+            if (rel["outbound"] == True):
+                direction = "outbound"
+            r = {
+                "label": "associated with",
+                "directionality": direction,
+                "count": rel["total"],
+                "attribute": rel['relationship']['label'].replace(" ", "_") + "_" + direction
+            }
+            rels.append(r)
+        return rels
+
+    def __repr__(self):
+        itemLoaded = "Loaded from API"
+        if (self._loaded == False):
+            itemLoaded = "Item not loaded from API. Call ._load(<node>.uuid) to fetch all relationships"
+        print({
+            "uuid": self.uuid,
+            "displayName": self.displayName,
+            "itemLoaded": itemLoaded,
+            "properties": self.properties,
+            "relationships": self.relationshipGroups
+        })
+        return json.dumps({
+            "uuid": self.uuid,
+            "displayName": self.displayName,
+            "itemLoaded": itemLoaded,
+            "properties": self.properties,
+            "relationships": self.relationshipGroups
+        })
+
+    @property
     def displayName(self):
         return self._data.get('displayName')
 
@@ -122,7 +157,6 @@ class Node:
     @properties.setter
     def properties(self, adict):
         print("setting properties")
-        print(adict)
         self._data['properties'].update(adict)
 
     def save(self):
@@ -152,9 +186,9 @@ class Node:
     def delete(self):
         pass
 
-    def _load(self):
+    def _load(self, uuid):
         res = requests.get(
-            f"{_setup.BIOBOX_REST_API}/bioref/object/{quote(self.uuid)}",
+            f"{_setup.BIOBOX_REST_API}/bioref/object/{quote(uuid)}",
             headers={
                 'x-biobox-orgid': _setup.BIOBOX_ORGID,
                 'Authorization': f'Bearer {_setup.BIOBOX_TOKEN}'
