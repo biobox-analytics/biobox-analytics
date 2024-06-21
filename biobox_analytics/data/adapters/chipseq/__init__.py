@@ -72,7 +72,7 @@ class ChipSeqAdapter(Adapter):
         }
 
         node_narrow_peak = {
-            "id": narrow_peak_id,
+            "_id": narrow_peak_id,
             "labels": labels,
             "properties": properties
         }
@@ -125,7 +125,7 @@ class ChipSeqAdapter(Adapter):
     
     def extra_items(self):
         chipseq = {
-            "id": self.chipseq_id,
+            "_id": self.chipseq_id,
             "labels": [ "ChIPseq" ],
             "properties": {
                 "uuid": self.chipseq_id,
