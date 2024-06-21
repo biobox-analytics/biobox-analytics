@@ -11,10 +11,9 @@ import json
 class Node:
     @classmethod
     def search_by_name(cls, searchtext, limit=50, offset=0):
-        if (limit > 100) {
+        if (limit > 100):
             print("Limit cannot be larger than 100. Use offset to find other objects");
             return
-        }
         res = requests.post(
             f"{_setup.BIOBOX_REST_API}/bioref/object/searchbyname",
             headers={
