@@ -183,6 +183,16 @@ class Node:
     def delete(self):
         pass
 
+    def loadFromDB(self):
+        bx_data = self._load(uuid=self.uuid)
+        self._loaded = True
+        if bx_data is not None:
+            self._exists = True
+            self._data = bx_data
+        if 'relationshipMetadata' in self._data.keys():
+            self._relationships = self._data['relationshipMetadata']
+            self.__generate_relationship_methods()
+
     def _load(self, uuid):
         res = requests.get(
             f"{_setup.BIOBOX_REST_API}/bioref/object/{quote(uuid)}",
