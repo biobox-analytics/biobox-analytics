@@ -31,7 +31,7 @@ class Node:
 
         data = res.json()
 
-        print(f"Found {data['total']} objects matching search text")
+        print(f"Found {data['total']} objects matching search text. Returning {limit} objects.")
         objs = []
 
         # print(data['data'])
@@ -43,6 +43,7 @@ class Node:
     def __init__(self, uuid, db_label=None, concept_labels=None, properties=None, enable_loading=True):
         self.uuid = uuid
         self._loaded = False
+        self._relationships = []
         if db_label != None:
             self.db_label = db_label
         elif (concept_labels != None):
@@ -130,13 +131,6 @@ class Node:
         itemLoaded = "Loaded from API"
         if (self._loaded == False):
             itemLoaded = "Item not loaded from API. Call ._load(<node>.uuid) to fetch all relationships"
-        print({
-            "uuid": self.uuid,
-            "displayName": self.displayName,
-            "itemLoaded": itemLoaded,
-            "properties": self.properties,
-            "relationships": self.relationshipGroups
-        })
         return json.dumps({
             "uuid": self.uuid,
             "displayName": self.displayName,
@@ -155,7 +149,7 @@ class Node:
 
     @property
     def properties(self):
-        return self._data['properties']
+        return self._data
 
     @properties.setter
     def properties(self, adict):

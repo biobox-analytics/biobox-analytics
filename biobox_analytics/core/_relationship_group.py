@@ -5,7 +5,6 @@ import requests
 import biobox_analytics._setup as _setup
 from biobox_analytics.core._concept import Concept
 from urllib.parse import quote
-import json
 
 class RelationshipGroup:
     def __init__(self, name, relationshipGroup, objUUID):
@@ -45,7 +44,6 @@ class RelationshipGroup:
             result.extend(self.fetch(limit=limit, offset=currentOffset))
             currentOffset += limit
         return result
-    
     
     def fetch(self, limit=10, offset=0):
         res = requests.post(
