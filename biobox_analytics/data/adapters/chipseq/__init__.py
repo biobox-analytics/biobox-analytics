@@ -16,7 +16,7 @@ class ChipSeqAdapter(Adapter):
         modification_type: str,
         sample_id: str,
         bed_filepath: str,
-        taxon_id: str = "9601",
+        taxon_id: str = "9606",
         objects_file: str = "objs.jsonl.gz",
         edges_file: str = "edges.jsonl.gz",
     ):
