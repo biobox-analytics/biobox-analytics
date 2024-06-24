@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "biobox_analytics"
-version = "0.1.6"
+version = "0.1.7"
 description = "BioBox CLI for data manipulation in python"
 readme = "README.md"
 readme-content-type = "text/markdown"  # Specify content type for Markdown
