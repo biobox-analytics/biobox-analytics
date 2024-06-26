@@ -100,7 +100,7 @@ class GenomeAdapter(Adapter):
                     "_id": f"{self.taxon}:{chrom['name']}:{start}-{(i+1)*1000}",
                     "labels": ["GenomicInterval"],
                     "properties": {
-                        "uuid": f"{self.taxon}:{chrom['name']}:{start}-{end}",
+                        "uuid": f"{self.taxon}:{chrom['name']}:{start}:{end}",
                         "displayName": f"{self.species} {chrom['name']}:{start}-{end}",
                         "taxon": self.taxon,
                         "species": self.species,
@@ -279,7 +279,7 @@ class GenomeAdapter(Adapter):
                         "uuid": self.genome.uuid,
                     },
                     "to": {
-                        "uuid": f"{self.taxon}:{chrom['name']}:{start}-{end}",
+                        "uuid": f"{self.taxon}:{chrom['name']}:{start}:{end}",
                     },
                     "label": "genome contains interval"
                 })
@@ -304,10 +304,10 @@ class GenomeAdapter(Adapter):
                 # write the edges to a file
                 coordinateEdges.append({
                     "from": {
-                        "uuid": f"{self.taxon}:{chrom['name']}:{start1}-{end1}",
+                        "uuid": f"{self.taxon}:{chrom['name']}:{start1}:{end1}",
                     },
                     "to": {
-                        "uuid": f"{self.taxon}:{chrom['name']}:{start2}-{end2}",
+                        "uuid": f"{self.taxon}:{chrom['name']}:{start2}:{end2}",
                     },
                     "label": "next"
                 })

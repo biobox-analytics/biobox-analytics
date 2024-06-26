@@ -5,7 +5,7 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "biobox-analytics"
 description = "BioBox CLI for data manipulation in python"
-version = "0.1.7"
+version = "0.1.8"
 readme = "README.md"
 readme-content-type = "text/markdown" 
 authors = [{name = "Christopher Li", email = "chris@biobox.io"},{name = "Hamza Farooq", email = "hamza@biobox.io"},{name = "Julian Mazzitelli", email = "julian@biobox.io"}]
